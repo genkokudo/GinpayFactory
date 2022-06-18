@@ -24,6 +24,7 @@ namespace GinpayFactory
     /// </remarks>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(PackageGuidString)]
+    [ProvideMenuResource("Menus.ctmenu", 1)]
     public sealed class GinpayFactoryPackage : AsyncPackage
     {
         /// <summary>
@@ -44,6 +45,7 @@ namespace GinpayFactory
             // 非同期で初期化する場合、この時点で現在のスレッドはバックグラウンドスレッドである可能性があります。
             // UIスレッドに切り替わった後、UIスレッドを必要とする初期化処理を行う。
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+            await GinpayFactory.FactoryItems.HelloWorkCommand.InitializeAsync(this);
         }
 
         #endregion
