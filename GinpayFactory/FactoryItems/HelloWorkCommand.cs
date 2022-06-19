@@ -25,16 +25,16 @@ namespace GinpayFactory.FactoryItems
         public static readonly Guid CommandSet = new Guid("7935a59d-f684-408d-a9f5-6c4b87412552");
 
         /// <summary>
-        /// VS Package that provides this command, not null.
+        /// このコマンドを提供するパッケージVS Package。NULLではありません。
         /// </summary>
         private readonly AsyncPackage package;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="HelloWorkCommand"/> class.
-        /// Adds our command handlers for menu (commands must exist in the command table file)
+        /// <see cref="HelloWorkCommand"/> クラスの新しいインスタンスを初期化します。
+        /// メニューのコマンドハンドラを追加（コマンドは、コマンドテーブルファイルに存在する必要があります）
         /// </summary>
-        /// <param name="package">Owner package, not null.</param>
-        /// <param name="commandService">Command service to add command to, not null.</param>
+        /// <param name="package">オーナーズパッケージ、NULLではありません。</param>
+        /// <param name="commandService">コマンドを追加するコマンドサービス（NULL不可）</param>
         private HelloWorkCommand(AsyncPackage package, OleMenuCommandService commandService)
         {
             package = package ?? throw new ArgumentNullException(nameof(package));
@@ -46,7 +46,7 @@ namespace GinpayFactory.FactoryItems
         }
 
         /// <summary>
-        /// Gets the instance of the command.
+        /// コマンドのインスタンスを取得します。
         /// </summary>
         public static HelloWorkCommand Instance
         {
@@ -55,7 +55,7 @@ namespace GinpayFactory.FactoryItems
         }
 
         /// <summary>
-        /// Gets the service provider from the owner package.
+        /// オーナーパッケージからサービス提供者を取得する。
         /// </summary>
         private IAsyncServiceProvider ServiceProvider
         {
@@ -66,13 +66,12 @@ namespace GinpayFactory.FactoryItems
         }
 
         /// <summary>
-        /// Initializes the singleton instance of the command.
+        /// コマンドのシングルトンインスタンスを初期化します。
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         public static async Task InitializeAsync(AsyncPackage package)
         {
-            // Switch to the main thread - the call to AddCommand in HelloWorkCommand's constructor requires
-            // the UI thread.
+            // メインスレッドに切り替える - HelloWorkCommandのコンストラクタ内のAddCommandの呼び出しは、UIスレッドを必要とします。
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
@@ -80,15 +79,15 @@ namespace GinpayFactory.FactoryItems
         }
 
         /// <summary>
-        /// This function is the callback used to execute the command when the menu item is clicked.
-        /// See the constructor to see how the menu item is associated with this function using
-        /// OleMenuCommandService service and MenuCommand class.
+        /// この関数は、メニュー項目がクリックされたときにコマンドを実行するために使用されるコールバックです。
+        /// OleMenuCommandServiceサービスとMenuCommandクラスを使って、どのようにメニュー項目とこの関数が関連付けられているかは、コンストラクタを参照してください。
         /// </summary>
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event args.</param>
         private void Execute(object sender, EventArgs e)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();    // なにこれ？
+            // UIスレッドで呼び出されているかどうかを判断し、そうでない場合はCOMException(RPC_E_WRONG_THREAD)を投げる。
+            ThreadHelper.ThrowIfNotOnUIThread();
 
             // タイトルと表示メッセージ
             string message = string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.GetType().FullName);

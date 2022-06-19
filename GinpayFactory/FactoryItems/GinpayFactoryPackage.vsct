@@ -1,58 +1,48 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-  <!--  This is the file that defines the actual layout and type of the commands.
-        It is divided in different sections (e.g. command definition, command
-        placement, ...), with each defining a specific set of properties.
-        See the comment before each section for more details about how to
-        use it. -->
+  <!-- これは、実際のコマンドのレイアウトとタイプを定義するファイルです。
+       さまざまなセクション（例：コマンドの定義、コマンドの配置、...）に分かれており、それぞれが特定のプロパティを定義しています。
+       使い方の詳細は、各セクションの前のコメントを参照してください。-->
 
-  <!--  The VSCT compiler (the tool that translates this file into the binary
-        format that VisualStudio will consume) has the ability to run a preprocessor
-        on the vsct file; this preprocessor is (usually) the C++ preprocessor, so
-        it is possible to define includes and macros with the same syntax used
-        in C++ files. Using this ability of the compiler here, we include some files
-        defining some of the constants that we will use inside the file. -->
+  <!-- VSCTコンパイラ（このファイルをVisualStudioが消費するバイナリ形式に変換するツール）は、vsctファイル上でプリプロセッサを実行する機能を持っています。
+       このプリプロセッサは（通常は）C++プリプロセッサなので、C++ファイルで使用されるのと同じ構文でインクルードとマクロの定義が可能です。
+       このコンパイラの能力を利用して、ファイル内で使用する定数を定義したファイルをいくつかインクルードしてみます。-->
 
-  <!--This is the file that defines the IDs for all the commands exposed by VisualStudio. -->
+  <!--VisualStudioが公開するすべてのコマンドのIDを定義したファイルです。 -->
   <Extern href="stdidcmd.h"/>
 
-  <!--This header contains the command ids for the menus provided by the shell. -->
+  <!--このヘッダには、シェルが提供するメニューのコマンドIDが含まれています。 -->
   <Extern href="vsshlids.h"/>
 
-  <!--The Commands section is where commands, menus, and menu groups are defined.
-      This section uses a Guid to identify the package that provides the command defined inside it. -->
+  <!--Commandsセクションは、コマンド、メニュー、およびメニュー・グループを定義する場所である。
+      このセクションは、その中で定義されたコマンドを提供するパッケージを識別するためにGuidを使用します。 -->
   <Commands package="guidGinpayFactoryPackage">
-    <!-- Inside this section we have different sub-sections: one for the menus, another
-    for the menu groups, one for the buttons (the actual commands), one for the combos
-    and the last one for the bitmaps used. Each element is identified by a command id that
-    is a unique pair of guid and numeric identifier; the guid part of the identifier is usually
-    called "command set" and is used to group different command inside a logically related
-    group; your package should define its own command set in order to avoid collisions
-    with command ids defined by other packages. -->
+    <!-- このセクションの中には、メニュー、メニューグループ、ボタン（実際のコマンド）、コンボ、
+	そして最後に使用されるビットマップのサブセクションがあります。
+	各要素は、guid と数値の識別子からなる一意のコマンド ID で識別されます。
+	識別子の guid 部分は通常「コマンドセット」と呼ばれ、
+	論理的に関連するグループ内で異なるコマンドをグループ化するために使用されます。 -->
 
-    <!-- In this section you can define new menu groups. A menu group is a container for
-         other menus or buttons (commands); from a visual point of view you can see the
-         group as the part of a menu contained between two lines. The parent of a group
-         must be a menu. -->
+    <!-- このセクションでは、新しいメニューグループを定義することができます。
+	メニューグループは、他のメニューやボタン(コマンド)のためのコンテナです。
+	グループの親はメニューでなければなりません。 -->
     <Groups>
       <Group guid="guidGinpayFactoryPackageCmdSet" id="MyMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
       </Group>
     </Groups>
 
-    <!--Buttons section. -->
-    <!--This section defines the elements the user can interact with, like a menu command or a button
-        or combo box in a toolbar. -->
+    <!--ボタンの項目です。 -->
+    <!--ここでは、メニューコマンドやツールバーのボタンやコンボボックスなど、ユーザーが操作できる要素を定義しています。 -->
     <Buttons>
-      <!--To define a menu group you have to specify its ID, the parent menu and its display priority.
-          The command is visible and enabled by default. If you need to change the visibility, status, etc, you can use
-          the CommandFlag node.
-          You can add more than one CommandFlag node e.g.:
+      <!--メニュー・グループを定義するには、そのID、親メニュー、および表示優先度を指定する必要があります。
+          コマンドは、デフォルトで表示され、有効になっています。可視性、状態などを変更する必要がある場合は、CommandFlag ノードを使用します。
+          次のように指定することで、複数のCommandFlagノードを追加することができます。 e.g.:
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
-          If you do not want an image next to your command, remove the Icon node /> -->
-      <Button guid="guidGinpayFactoryPackageCmdSet" id="HelloWorkCommandId" priority="0x0100" type="Button">
+          コマンドの横に画像を表示したくない場合は、Iconノードを削除してください /> -->
+		<Button guid="guidGinpayFactoryPackageCmdSet" id="HelloWorkCommandId" priority="0x0100" type="Button">
         <Parent guid="guidGinpayFactoryPackageCmdSet" id="MyMenuGroup" />
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
@@ -61,22 +51,20 @@
       </Button>
     </Buttons>
 
-    <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
+    <!--ビットマップセクションは、コマンドに使用されるビットマップを定義するために使用されます。-->
     <Bitmaps>
-      <!--  The bitmap id is defined in a way that is a little bit different from the others:
-            the declaration starts with a guid for the bitmap strip, then there is the resource id of the
-            bitmap strip containing the bitmaps and then there are the numeric ids of the elements used
-            inside a button definition. An important aspect of this declaration is that the element id
-            must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
+      <!-- ビットマップIDは、他のものとは少し異なる方法で定義されています。
+	  宣言は、ビットマップストリップのguidから始まり、ビットマップを含むビットマップストリップのリソースID、そして、ボタン定義の中で使われる要素の数値idがあります。
+	  この宣言の重要な点は、要素IDがビットマップストリップ内のビットマップの実際のインデックス（1ベース）でなければならないことです。 -->
       <Bitmap guid="guidImages" href="Resources\HelloWorkCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough"/>
     </Bitmaps>
   </Commands>
 
   <Symbols>
-    <!-- This is the package guid. -->
+    <!-- パッケージのguidです。 -->
     <GuidSymbol name="guidGinpayFactoryPackage" value="{6bc4622b-ca50-42d7-9ab8-80f6764254d9}" />
 
-    <!-- This is the guid used to group the menu commands together -->
+    <!-- メニューコマンドをグループ化するために使用されるguidです -->
     <GuidSymbol name="guidGinpayFactoryPackageCmdSet" value="{7935a59d-f684-408d-a9f5-6c4b87412552}">
       <IDSymbol name="MyMenuGroup" value="0x1020" />
       <IDSymbol name="HelloWorkCommandId" value="0x0100" />
