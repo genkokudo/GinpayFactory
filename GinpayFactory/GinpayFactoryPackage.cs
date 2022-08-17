@@ -15,6 +15,7 @@ namespace GinpayFactory
     {
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
+            // [Command]を実装したCommandクラスに対して、自動的にInitializeAsyncを呼んでくれる。
             await this.RegisterCommandsAsync();
         }
     }
