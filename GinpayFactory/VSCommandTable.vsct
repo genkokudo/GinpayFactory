@@ -11,6 +11,10 @@
       <Group guid="GinpayFactory" id="MyMenuGroup" priority="0x0600">
         <Parent guid="VSMainMenu" id="Tools"/>
       </Group>
+      <!-- できない。今は放っておこう。-->
+      <Group guid="GinpayFactory" id="MyWindowGroup" priority="0x0700">
+        <Parent guid="VSMainMenu" id="View.DevWindowsGroup.OtherWindows.Group1"/>
+      </Group>
     </Groups>
 
     <!--This section defines the elements the user can interact with, like a menu command or a button
@@ -34,14 +38,25 @@
           <LocCanonicalName>.GinpayFactory.SexyCommand</LocCanonicalName>
         </Strings>
       </Button>
+      <Button guid="GinpayFactory" id="GenkokuCommand" priority="0x0300" type="Button">
+        <Parent guid="GinpayFactory" id="MyMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="PasteAppend" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>謎のGenkokuWindow</ButtonText>
+          <LocCanonicalName>.GinpayFactory.GenkokuWindow</LocCanonicalName>
+        </Strings>
+      </Button>
     </Buttons>
   </Commands>
 
   <Symbols>
     <GuidSymbol name="GinpayFactory" value="{773d7868-2bb7-4fc4-9df8-4b6dc12c2de2}">
       <IDSymbol name="MyMenuGroup" value="0x0001" />
+      <IDSymbol name="MyWindowGroup" value="0x0002" />
       <IDSymbol name="MyCommand" value="0x0100" />
       <IDSymbol name="SexyCommand" value="0x0200" />
+      <IDSymbol name="GenkokuCommand" value="0x0300" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

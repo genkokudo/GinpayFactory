@@ -9,6 +9,7 @@ namespace GinpayFactory
 {
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration(Vsix.Name, Vsix.Description, Vsix.Version)]
+    [ProvideToolWindow(typeof(GenkokuWindow.Pane), Style = VsDockStyle.Tabbed, Window = WindowGuids.SolutionExplorer)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(PackageGuids.GinpayFactoryString)]
     public sealed class GinpayFactoryPackage : ToolkitPackage
@@ -17,6 +18,9 @@ namespace GinpayFactory
         {
             // [Command]を実装したCommandクラスに対して、自動的にInitializeAsyncを呼んでくれる。
             await this.RegisterCommandsAsync();
+
+            // 作成したウィンドウを登録する
+            this.RegisterToolWindows();
         }
     }
 }
