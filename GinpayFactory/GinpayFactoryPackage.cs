@@ -10,6 +10,7 @@ namespace GinpayFactory
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration(Vsix.Name, Vsix.Description, Vsix.Version)]
     [ProvideToolWindow(typeof(GenkokuWindow.Pane), Style = VsDockStyle.Tabbed, Window = WindowGuids.SolutionExplorer)]
+    [ProvideOptionPage(typeof(OptionsProvider.GinpayOptionOptions), "GinpayFactory", "GinpayOption", 0, 0, true, SupportsProfiles = true)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(PackageGuids.GinpayFactoryString)]
     public sealed class GinpayFactoryPackage : ToolkitPackage
