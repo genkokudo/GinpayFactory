@@ -26,7 +26,7 @@
                 Name="button1"
                 Width="120"
                 Height="80"
-                Click="button1_Click"
+                Click="Button1_Click"
                 Content="Click me!" />
         </StackPanel>
     </Grid>
