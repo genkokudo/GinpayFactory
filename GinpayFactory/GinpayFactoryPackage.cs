@@ -2,6 +2,9 @@
 global using Microsoft.VisualStudio.Shell;
 global using System;
 global using Task = System.Threading.Tasks.Task;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using GinpayFactory.Services;
+using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -22,6 +25,14 @@ namespace GinpayFactory
 
             // 作成したウィンドウを登録する
             this.RegisterToolWindows();
+
+            // 作成したサービスをDIできるように登録する
+            Ioc.Default.ConfigureServices(new ServiceCollection()
+                        .AddTransient<ITestService, TestService>()
+                        .AddTransient<IDeeplService, DeeplService>()
+                        .AddTransient<GenkokuWindowControl>()
+                        .BuildServiceProvider());
+
         }
     }
 }

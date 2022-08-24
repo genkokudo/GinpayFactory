@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.OLE.Interop;
+﻿using GinpayFactory.Services;
+using Microsoft.VisualStudio.OLE.Interop;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
@@ -9,13 +10,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace GinpayFactory
 {
     public partial class GenkokuWindowControl : UserControl
     {
-        public GenkokuWindowControl()
+        private ITestService Test { get; }
+
+        public GenkokuWindowControl(ITestService test)
         {
+            Test = test;
             InitializeComponent();
         }
 
@@ -25,6 +30,8 @@ namespace GinpayFactory
         {
             try
             {
+                var aaaa = Test.Test();
+
                 await Task.Run(async () =>
                 {
                     var general = await GinpayOption.GetLiveInstanceAsync();

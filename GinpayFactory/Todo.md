@@ -7,5 +7,5 @@ General.Instance.MyEnum;
 または  
 General.GetLiveInstanceAsync();
 
-
+DeepLはService化してDIする。
 
