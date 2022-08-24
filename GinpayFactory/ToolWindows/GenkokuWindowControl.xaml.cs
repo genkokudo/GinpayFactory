@@ -16,11 +16,11 @@ namespace GinpayFactory
 {
     public partial class GenkokuWindowControl : UserControl
     {
-        private ITestService Test { get; }
+        private IDeeplService Deepl { get; }
 
-        public GenkokuWindowControl(ITestService test)
+        public GenkokuWindowControl(IDeeplService deepl)
         {
-            Test = test;
+            Deepl = deepl;
             InitializeComponent();
         }
 
@@ -30,32 +30,32 @@ namespace GinpayFactory
         {
             try
             {
-                var aaaa = Test.Test();
-
                 await Task.Run(async () =>
                 {
-                    var general = await GinpayOption.GetLiveInstanceAsync();
-                    var authKey = general.ApiKey;
-                    
-                    // DeepLの実装してみる
-                    using var httpClient = new HttpClient();
-                    using var request = new HttpRequestMessage(new HttpMethod("POST"), "https://api-free.deepl.com/v2/translate");
-                    var contentList = new List<string>
-                                {
-                                    "auth_key=" + authKey,
-                                    "text=Hello, world!",
-                                    "target_lang=JA"
-                                };
-                    request.Content = new StringContent(string.Join("&", contentList));
-                    request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-www-form-urlencoded");
+                    var test = await Deepl.TestAsync();
 
-                    var response = await httpClient.SendAsync(request);
-                    var resBodyStr = await response.Content.ReadAsStringAsync();
-                    
-                    // "{\"translations\":[{\"detected_source_language\":\"EN\",\"text\":\"ハロー、ワールド\"}]}"
-                    var deserial = (JObject)JsonConvert.DeserializeObject(resBodyStr);
-                    var result = deserial["translations"][0]["text"].ToString();
-                    
+                    //var general = await GinpayOption.GetLiveInstanceAsync();
+                    //var authKey = general.ApiKey;
+
+                    //// DeepLの実装してみる
+                    //using var httpClient = new HttpClient();
+                    //using var request = new HttpRequestMessage(new HttpMethod("POST"), "https://api-free.deepl.com/v2/translate");
+                    //var contentList = new List<string>
+                    //            {
+                    //                "auth_key=" + authKey,
+                    //                "text=Hello, world!",
+                    //                "target_lang=JA"
+                    //            };
+                    //request.Content = new StringContent(string.Join("&", contentList));
+                    //request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-www-form-urlencoded");
+
+                    //var response = await httpClient.SendAsync(request);
+                    //var resBodyStr = await response.Content.ReadAsStringAsync();
+
+                    //// "{\"translations\":[{\"detected_source_language\":\"EN\",\"text\":\"ハロー、ワールド\"}]}"
+                    //var deserial = (JObject)JsonConvert.DeserializeObject(resBodyStr);
+                    //var result = deserial["translations"][0]["text"].ToString();
+
                     // ログの出し方は？
                 });
             }
