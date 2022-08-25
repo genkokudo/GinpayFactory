@@ -39,6 +39,7 @@ namespace GinpayFactory
             Ioc.Default.ConfigureServices(new ServiceCollection()
                         .AddTransient<IDeeplService, DeeplService>()
                         .AddTransient<GenkokuWindowControl>()
+                        .AddTransient<SexyCommand>()
                         .AddSingleton(deeplOption)
                         .BuildServiceProvider());
 
