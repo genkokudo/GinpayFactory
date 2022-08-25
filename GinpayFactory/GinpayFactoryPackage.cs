@@ -27,26 +27,33 @@ namespace GinpayFactory
             // 作成したウィンドウを登録する
             this.RegisterToolWindows();
 
-            // 設定項目の読み込み
+            // 設定項目を読み込む
+            // Servicesを使い回せるようにIOptionsにする
             var general = await GinpayOption.GetLiveInstanceAsync();
-            var deeplOption = new DeeplOption { ApiKey = general.ApiKey };
-            var deeplOption2 = Options.Create(deeplOption);     // Servicesは使い回せるようにIOptionsにしたい。これでいい？
-
-            GinpayOption.Saved += GinpayOption_Saved;
+            var deeplOption = Options.Create(new DeeplOption { 
+                ApiKey = general.ApiKey 
+            });
 
             // 作成したサービスをDIできるように登録する
             // appsettings.jsonではないので、AddOptionsは使用しない
             Ioc.Default.ConfigureServices(new ServiceCollection()
                         .AddTransient<IDeeplService, DeeplService>()
                         .AddTransient<GenkokuWindowControl>()
-                        .AddSingleton(deeplOption2)
+                        .AddSingleton(deeplOption)
                         .BuildServiceProvider());
 
+
+            // VSの設定変更時にイベント処理で反映させる
+            GinpayOption.Saved += (GinpayOption obj) =>
+            {
+                Ioc.Default.GetService<IOptions<DeeplOption>>().Value.ApiKey = obj.ApiKey;
+            };
+            //GinpayOption.Saved += GinpayOption_Saved;
         }
 
-        private void GinpayOption_Saved(GinpayOption obj)
-        {
-            Ioc.Default.GetService<IOptions<DeeplOption>>().Value.ApiKey = obj.ApiKey;  // 更新
-        }
+        //private void GinpayOption_Saved(GinpayOption obj)
+        //{
+        //    Ioc.Default.GetService<IOptions<DeeplOption>>().Value.ApiKey = obj.ApiKey;  // 更新
+        //}
     }
 }
