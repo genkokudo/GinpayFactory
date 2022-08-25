@@ -32,29 +32,7 @@ namespace GinpayFactory
             {
                 await Task.Run(async () =>
                 {
-                    var test = await Deepl.TestAsync();
-
-                    //var general = await GinpayOption.GetLiveInstanceAsync();
-                    //var authKey = general.ApiKey;
-
-                    //// DeepLの実装してみる
-                    //using var httpClient = new HttpClient();
-                    //using var request = new HttpRequestMessage(new HttpMethod("POST"), "https://api-free.deepl.com/v2/translate");
-                    //var contentList = new List<string>
-                    //            {
-                    //                "auth_key=" + authKey,
-                    //                "text=Hello, world!",
-                    //                "target_lang=JA"
-                    //            };
-                    //request.Content = new StringContent(string.Join("&", contentList));
-                    //request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-www-form-urlencoded");
-
-                    //var response = await httpClient.SendAsync(request);
-                    //var resBodyStr = await response.Content.ReadAsStringAsync();
-
-                    //// "{\"translations\":[{\"detected_source_language\":\"EN\",\"text\":\"ハロー、ワールド\"}]}"
-                    //var deserial = (JObject)JsonConvert.DeserializeObject(resBodyStr);
-                    //var result = deserial["translations"][0]["text"].ToString();
+                    var test = await Deepl.TranslateAsync("");
 
                     // ログの出し方は？
                 });
