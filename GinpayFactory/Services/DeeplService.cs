@@ -61,11 +61,14 @@ namespace GinpayFactory.Services
 
                 var response = await httpClient.SendAsync(request);
                 var resBodyStr = await response.Content.ReadAsStringAsync();
+                if (string.IsNullOrWhiteSpace(resBodyStr))
+                {
+                    return null;
+                }
 
                 // "{\"translations\":[{\"detected_source_language\":\"EN\",\"text\":\"ハロー、ワールド\"}]}"
                 var deserial = (JObject)JsonConvert.DeserializeObject(resBodyStr);
                 return deserial["translations"][0]["text"].ToString();
-
             }
             catch (Exception)
             {
