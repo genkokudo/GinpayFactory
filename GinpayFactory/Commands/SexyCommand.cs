@@ -23,7 +23,7 @@ namespace GinpayFactory
             OutputWindowPane pane = await VS.Windows.CreateOutputWindowPaneAsync("Ginpay");
 
             // 選択中のコメントをDeepLにかけたい。
-            // 2バイト文字が入ってたら対象にしない。
+            // TODO:2バイト文字が入ってたら対象にしない。
             // コメントの斜線を排除する。
 
             // 選択範囲があれば実行
@@ -37,8 +37,6 @@ namespace GinpayFactory
                 // 選択範囲がある場合
                 // 選択文字列を取得
                 var selectedText = selection.SelectedSpans[0].GetText();
-
-                // TODO:メソッドコメントなどのXMLは各文字列に取得できるけど面倒。あったら便利？
 
                 // 斜線と改行を排除
                 await pane.WriteLineAsync("原文:");
