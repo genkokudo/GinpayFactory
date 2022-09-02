@@ -33,8 +33,6 @@ namespace GinpayFactory
                 await Task.Run(async () =>
                 {
                     var test = await Deepl.TranslateAsync("");
-
-                    // ログの出し方は？
                 });
             }
             catch (Exception ex)

@@ -45,6 +45,13 @@ namespace GinpayFactory
                 await pane.WriteLineAsync("整形後原文:");
                 await pane.WriteLineAsync(selectedText);
 
+                // 2バイト文字が入ってないか
+                if (IsOneByteChar(selectedText))
+                {
+                    await pane.WriteLineAsync("2バイト文字が入っているようなので翻訳しません。");
+                    return;
+                }
+
                 // DeepL
                 var deepl = Ioc.Default.GetService<IDeeplService>();
                 var result = await deepl.TranslateAsync(selectedText);
@@ -103,35 +110,5 @@ namespace GinpayFactory
             }
         }
 
-        // 選択範囲がある時だけ右クリックメニューに表示させたいのだが・・・？
-        //      "menus": {
-        //"editor/context": [
-        //  {
-        //    "when": "editorHasSelection", // エディタで文字が選択されているときのみ
-        //    "command": "vscode-context.upperCase", // コマンドの名前
-        //    "group": "myGroup@1" // メニューのどこに表示するか
-        //  }
-        //]
-
-        ///// <summary>
-        ///// 現在のエディタに対して、GUIDを採番して挿入する
-        ///// </summary>
-        ///// <param name="e"></param>
-        ///// <returns></returns>
-        //protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
-        //{
-        //    // 各コマンドの最初に必要？
-        //    await Package.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-        //    // 現在編集中のドキュメントを取得
-        //    var docView = await VS.Documents.GetActiveDocumentViewAsync();
-        //    if (docView?.TextView == null) return;
-
-        //    // ドキュメントから現在のカーソル位置を取得
-        //    var position = docView.TextView.Caret.Position.BufferPosition;
-
-        //    // 対象のカーソル位置に文字列を挿入
-        //    docView.TextBuffer?.Insert(position, Guid.NewGuid().ToString());
-        //}
     }
 }
