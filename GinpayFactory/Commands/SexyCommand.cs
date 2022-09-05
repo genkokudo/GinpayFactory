@@ -10,7 +10,8 @@ namespace GinpayFactory
     internal sealed class SexyCommand : BaseCommand<SexyCommand>
     {
         /// <summary>
-        /// 現在のエディタに対して、GUIDを採番して挿入する
+        /// 選択範囲に対して、DeepLで日本語に翻訳して挿入する
+        /// 英語のみ
         /// </summary>
         /// <param name="e"></param>
         /// <returns></returns>
@@ -23,7 +24,6 @@ namespace GinpayFactory
             OutputWindowPane pane = await VS.Windows.CreateOutputWindowPaneAsync("Ginpay");
 
             // 選択中のコメントをDeepLにかけたい。
-            // TODO:2バイト文字が入ってたら対象にしない。
             // コメントの斜線を排除する。
 
             // 選択範囲があれば実行
@@ -46,7 +46,7 @@ namespace GinpayFactory
                 await pane.WriteLineAsync(selectedText);
 
                 // 2バイト文字が入ってないか
-                if (IsOneByteChar(selectedText))
+                if (!IsOneByteChar(selectedText))
                 {
                     await pane.WriteLineAsync("2バイト文字が入っているようなので翻訳しません。");
                     return;
