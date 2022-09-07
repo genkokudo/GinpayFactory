@@ -22,7 +22,21 @@ namespace GinpayFactory
             // ソリューション内のすべてのプロジェクトを取得する
             var projects = await VS.Solutions.GetAllProjectsAsync();
             var project = projects.First();
-            var references = project.References;
+            foreach (var child in project.Children)
+            {
+                if (child.Type == SolutionItemType.PhysicalFile)
+                {
+                    // これでファイルが取れる。
+                    Console.WriteLine(child.FullPath);
+                }
+                if (child.Type == SolutionItemType.PhysicalFolder)
+                {
+                }
+
+            }
+            
+            var references = project.References;        // 謎。Nugetの参照とか取れるわけではない。
+            var reference = references.FirstOrDefault();
 
             // プロジェクトは取れるけど、名前の取得とか、ファイルの追加とかぐらいしか出来ないっぽい。
 
