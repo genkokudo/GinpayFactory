@@ -9,9 +9,9 @@
   <Commands package="GinpayFactory">
     <Groups>
       <!-- VSの「ツール」の所に出す場合 -->
-      <!--<Group guid="GinpayFactory" id="MyMenuGroup" priority="0x0600">
+      <Group guid="GinpayFactory" id="MyMenuGroup" priority="0x0600">
         <Parent guid="VSMainMenu" id="Tools"/>
-      </Group>-->
+      </Group>
       
       <!-- XAML右クリにもcs右クリにも出す、この場合は同じ値のGroupタグを複数定義する。 -->
       <Group guid="GinpayFactory" id="MyContextMenuGroup" priority="0x0700">
@@ -23,7 +23,7 @@
     </Groups>
 
     <Buttons>
-      <!--<Button guid="GinpayFactory" id="MyCommand" priority="0x0100" type="Button">
+      <Button guid="GinpayFactory" id="MyCommand" priority="0x0100" type="Button">
         <Parent guid="GinpayFactory" id="MyMenuGroup" />
         <Icon guid="ImageCatalogGuid" id="StatusInformation" />
         <CommandFlag>IconIsMoniker</CommandFlag>
@@ -40,9 +40,9 @@
           <ButtonText>謎のGenkokuWindow</ButtonText>
           <LocCanonicalName>.GinpayFactory.GenkokuWindow</LocCanonicalName>
         </Strings>
-      </Button>-->
+      </Button>
 
-      <!-- 今作ってるやつ -->
+      <!-- 今作ってるやつ
       <Button guid="GinpayFactory" id="SexyCommand" priority="0x0200" type="Button">
         <Parent guid="GinpayFactory" id="MyContextMenuGroup" />
         <Icon guid="ImageCatalogGuid" id="PasteAppend" />
@@ -51,7 +51,7 @@
           <ButtonText>選択範囲をDeepL翻訳</ButtonText>
           <LocCanonicalName>.GinpayFactory.SexyCommand</LocCanonicalName>
         </Strings>
-      </Button>
+      </Button> -->
       
     </Buttons>
   </Commands>
@@ -59,10 +59,10 @@
   
   <Symbols>
     <GuidSymbol name="GinpayFactory" value="{773d7868-2bb7-4fc4-9df8-4b6dc12c2de2}">
-      <!-- <IDSymbol name="MyMenuGroup" value="0x0001" />
+      <IDSymbol name="MyMenuGroup" value="0x0001" />
       <IDSymbol name="MyWindowGroup" value="0x0002" />
       <IDSymbol name="MyCommand" value="0x0100" />
-      <IDSymbol name="GenkokuCommand" value="0x0300" /> -->
+      <IDSymbol name="GenkokuCommand" value="0x0300" />
       <IDSymbol name="MyContextMenuGroup" value="0x0003" />
       <IDSymbol name="SexyCommand" value="0x0200" />
     </GuidSymbol>
