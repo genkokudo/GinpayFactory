@@ -32,7 +32,6 @@ namespace GinpayFactory
                 if (child.Type == SolutionItemType.PhysicalFolder)
                 {
                 }
-
             }
             
             var references = project.References;        // 謎。Nugetの参照とか取れるわけではない。
