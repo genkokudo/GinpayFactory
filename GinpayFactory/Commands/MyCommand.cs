@@ -1,45 +1,49 @@
-﻿using Microsoft.VisualStudio.Text;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using GinpayFactory.Services;
+using Microsoft.VisualStudio.Text;
+using System.IO;
 using System.Linq;
 
 namespace GinpayFactory
 {
+    /// <summary>
+    /// 現在のプロジェクト内から
+    /// DIするサービスを登録するクラスを探す
+    /// 単純な文字列検索のため、コメントアウトしていても認識してしまう。
+    /// 1度見つけたら記憶するため、VS再起動するまで変更は受け付けない。→見つからなかったら再検索するように改善する？
+    /// </summary>
     [Command(PackageIds.MyCommand)]
     internal sealed class MyCommand : BaseCommand<MyCommand>
     {
+        private static string DiPath = null;    // TODO:これはシングルトンサービスに持たせないと他から呼べない。新しくサービスを作成すること。
+        
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
-            // アクティブなテキスト ビューを取得する
-            DocumentView docView = await VS.Documents.GetActiveDocumentViewAsync();
-            if (docView?.TextView == null) return; //not a text window
-            SnapshotPoint position = docView.TextView.Caret.Position.BufferPosition;
-            docView.TextBuffer?.Insert(position, "some text"); // Inserts text at the caret
-
-            //// 含まれているファイルからプロジェクトを取得する
-            //string fileName = "c:\\file\\in\\project.txt";
-            //PhysicalFile item = await PhysicalFile.FromFileAsync(fileName);
-            //Project project = item.ContainingProject;
-
-            // ソリューション内のすべてのプロジェクトを取得する
-            var projects = await VS.Solutions.GetAllProjectsAsync();
-            var project = projects.First();
-            foreach (var child in project.Children)
+            if (!string.IsNullOrWhiteSpace(DiPath))
             {
-                if (child.Type == SolutionItemType.PhysicalFile)
+                return;
+            }
+            // DI
+            var source = Ioc.Default.GetService<ISourceService>();
+
+            // ソリューション内の.csファイルのフルパスを全て取得
+            var csList = await source.GetSourcePathListAsync();
+
+            // .csから、DI登録しているクラスを探す
+            // CommunityToolkitのみ対応。
+            foreach (var cs in csList)
+            {
+                var text = File.ReadAllText(cs);
+                if (text.Contains("Ioc.Default.ConfigureServices"))     // TODO:EnumのSwitchにしてオプション化すること。Enumは表示と値を持たせること。
                 {
-                    // これでファイルが取れる。
-                    Console.WriteLine(child.FullPath);
-                }
-                if (child.Type == SolutionItemType.PhysicalFolder)
-                {
+                    // 見つかったら覚えておく
+                    DiPath = cs;
+                    break;
                 }
             }
             
-            var references = project.References;        // 謎。Nugetの参照とか取れるわけではない。
-            var reference = references.FirstOrDefault();
 
-            // プロジェクトは取れるけど、名前の取得とか、ファイルの追加とかぐらいしか出来ないっぽい。
-
-            Console.WriteLine();
+            
         }
     }
 }

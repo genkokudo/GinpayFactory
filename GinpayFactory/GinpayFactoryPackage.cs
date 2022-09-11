@@ -38,8 +38,9 @@ namespace GinpayFactory
             // appsettings.jsonではないので、AddOptionsは使用しない
             Ioc.Default.ConfigureServices(new ServiceCollection()
                         .AddTransient<IDeeplService, DeeplService>()
+                        .AddTransient<ISourceService, SourceService>()
                         .AddTransient<GenkokuWindowControl>()
-                        .AddTransient<SexyCommand>()
+                        //.AddTransient<SexyCommand>()
                         .AddSingleton(deeplOption)
                         .BuildServiceProvider());
 
