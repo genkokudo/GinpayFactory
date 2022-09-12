@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using GinpayFactory.Enums;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 namespace GinpayFactory
@@ -16,6 +17,12 @@ namespace GinpayFactory
         [Description("DeepLのAPIキーを設定する。")]
         [DefaultValue("DeeplApiKey")]
         public string ApiKey { get; set; } = "DeeplApiKey";
+
+        [Category("DeepLの設定")]
+        [DisplayName("DI Library")]
+        [Description("使用するDIライブラリ")]
+        [DefaultValue(DiLibrary.CommunityToolkit)]
+        public DiLibrary DiLibrary { get; set; } = DiLibrary.CommunityToolkit;
 
         //[Category("意味のない設定")]
         //[DisplayName("Like")]

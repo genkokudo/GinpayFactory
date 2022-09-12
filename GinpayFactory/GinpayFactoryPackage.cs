@@ -30,32 +30,32 @@ namespace GinpayFactory
             // 設定項目を読み込む
             // Servicesを使い回せるようにIOptionsにする
             var general = await GinpayOption.GetLiveInstanceAsync();
-            var deeplOption = Options.Create(new DeeplOption { 
-                ApiKey = general.ApiKey 
+            var deeplOption = Options.Create(new DeeplOption
+            {
+                ApiKey = general.ApiKey
+            });
+            var diOption = Options.Create(new DiOption
+            {
+                DiLibrary = general.DiLibrary
             });
 
             // 作成したサービスをDIできるように登録する
             // appsettings.jsonではないので、AddOptionsは使用しない
             Ioc.Default.ConfigureServices(new ServiceCollection()
                         .AddTransient<IDeeplService, DeeplService>()
-                        .AddTransient<ISourceService, SourceService>()
+                        .AddSingleton<ISourceService, SourceService>()
                         .AddTransient<GenkokuWindowControl>()
-                        //.AddTransient<SexyCommand>()
                         .AddSingleton(deeplOption)
+                        .AddSingleton(diOption)
                         .BuildServiceProvider());
-
 
             // VSの設定変更時にイベント処理で反映させる
             GinpayOption.Saved += (GinpayOption obj) =>
             {
                 Ioc.Default.GetService<IOptions<DeeplOption>>().Value.ApiKey = obj.ApiKey;
+                Ioc.Default.GetService<IOptions<DiOption>>().Value.DiLibrary = obj.DiLibrary;
             };
-            //GinpayOption.Saved += GinpayOption_Saved;
         }
 
-        //private void GinpayOption_Saved(GinpayOption obj)
-        //{
-        //    Ioc.Default.GetService<IOptions<DeeplOption>>().Value.ApiKey = obj.ApiKey;  // 更新
-        //}
     }
 }

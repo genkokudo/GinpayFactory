@@ -15,34 +15,14 @@ namespace GinpayFactory
     [Command(PackageIds.MyCommand)]
     internal sealed class MyCommand : BaseCommand<MyCommand>
     {
-        private static string DiPath = null;    // TODO:これはシングルトンサービスに持たせないと他から呼べない。新しくサービスを作成すること。
-        
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(DiPath))
-            {
-                return;
-            }
             // DI
             var source = Ioc.Default.GetService<ISourceService>();
 
-            // ソリューション内の.csファイルのフルパスを全て取得
-            var csList = await source.GetSourcePathListAsync();
-
-            // .csから、DI登録しているクラスを探す
+            // ソリューション内の.csから、DI登録しているクラスを探す
             // CommunityToolkitのみ対応。
-            foreach (var cs in csList)
-            {
-                var text = File.ReadAllText(cs);
-                if (text.Contains("Ioc.Default.ConfigureServices"))     // TODO:EnumのSwitchにしてオプション化すること。Enumは表示と値を持たせること。
-                {
-                    // 見つかったら覚えておく
-                    DiPath = cs;
-                    break;
-                }
-            }
-            
-
+            await source.UpdateDiSourcePathAsync();
             
         }
     }
