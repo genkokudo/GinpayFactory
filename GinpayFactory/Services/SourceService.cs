@@ -1,22 +1,11 @@
-﻿using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GinpayFactory.Enums;
 using Microsoft.Extensions.Options;
-using Community.VisualStudio.Toolkit;
+using System.Collections.Generic;
 using System.IO;
-using System.Windows.Shapes;
-using Microsoft.VisualStudio.Package;
+using System.Linq;
+using System.Threading.Tasks;
 using Path = System.IO.Path;
-using GinpayFactory.Enums;
 
-// 機能とか対応言語増やすならここ
-// https://www.deepl.com/docs-api
 namespace GinpayFactory.Services
 {
     public class DiOption

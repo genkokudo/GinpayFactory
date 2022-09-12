@@ -42,12 +42,14 @@ namespace GinpayFactory
             // 作成したサービスをDIできるように登録する
             // appsettings.jsonではないので、AddOptionsは使用しない
             Ioc.Default.ConfigureServices(new ServiceCollection()
-                        .AddTransient<IDeeplService, DeeplService>()
-                        .AddSingleton<ISourceService, SourceService>()
-                        .AddTransient<GenkokuWindowControl>()
-                        .AddSingleton(deeplOption)
-                        .AddSingleton(diOption)
-                        .BuildServiceProvider());
+                    .AddTransient<IDeeplService, DeeplService>()
+                    .AddSingleton<ISourceService, SourceService>()
+                    .AddTransient<IRoslynService, RoslynService>()
+                    .AddTransient<GenkokuWindowControl>()
+                    .AddSingleton(deeplOption)
+                    .AddSingleton(diOption)
+                    .BuildServiceProvider()
+            );
 
             // VSの設定変更時にイベント処理で反映させる
             GinpayOption.Saved += (GinpayOption obj) =>

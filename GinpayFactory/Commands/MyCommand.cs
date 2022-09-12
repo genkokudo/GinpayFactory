@@ -19,11 +19,28 @@ namespace GinpayFactory
         {
             // DI
             var source = Ioc.Default.GetService<ISourceService>();
+            var roslyn = Ioc.Default.GetService<IRoslynService>();
 
             // ソリューション内の.csから、DI登録しているクラスを探す
-            // CommunityToolkitのみ対応。
             await source.UpdateDiSourcePathAsync();
-            
+
+            // 現在のソースが.csであることを確認する
+            var docView = await VS.Documents.GetActiveDocumentViewAsync();
+            if (docView == null) return;
+            if (docView.TextView == null) return;
+            var ex = Path.GetExtension(docView.FilePath);
+            if (ex != ".cs") return;
+
+            // ドキュメントからサービス名か、インタフェース名を取得（Roslynかなあ…。）
+
+            //docView.FilePath
+
+            // 現在のソースがServiceまたはIServiceの場合、上記で見つけた箇所にAddTransientを追加する
+            // .AddTransient<ISourceService, SourceService>()
+            // (AddSingletonは別コマンド)
+
+            // ".BuildServiceProvider()"という行の上に挿入。スペースの数もここと一緒にする。
+
         }
     }
 }
