@@ -25,11 +25,11 @@ namespace GinpayFactory
             await source.UpdateDiSourcePathAsync();
 
             // 現在のソースが.csであることを確認する
-            var docView = await VS.Documents.GetActiveDocumentViewAsync();
-            if (docView == null) return;
-            if (docView.TextView == null) return;
-            var ex = Path.GetExtension(docView.FilePath);
-            if (ex != ".cs") return;
+            if (!await source.CheckCurrentSourceIsCSharpAsync())
+            {
+                // .csではない
+                return;
+            }
 
             // ドキュメントからサービス名か、インタフェース名を取得（Roslynかなあ…。）
 
