@@ -1,19 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using System;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
-using Community.VisualStudio.Toolkit;
+using System.Collections.ObjectModel;
 using System.IO;
-using System.Windows.Shapes;
-using Microsoft.VisualStudio.Package;
-using Path = System.IO.Path;
-using GinpayFactory.Enums;
+using System.Linq;
 
 namespace GinpayFactory.Services
 {
@@ -29,16 +20,63 @@ namespace GinpayFactory.Services
         /// そのサービス名を取得する。
         /// "～～Service"というネーミング以外は無効とする。
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns>サービス名</returns>
-        public string GetServiceClassName(string filePath);
+        /// <param name="path"></param>
+        /// <returns>見つかったサービス名全て</returns>
+        public IEnumerable<string> GetServiceClassNames(string path);
     }
 
     public class RoslynService : IRoslynService
     {
-        public string GetServiceClassName(string filePath)
+        // 解析用コンパイラで参照するdll
+        // ぶっちゃけよく分かってない。おまじない。
+        // 多分、コンパイルエラーが出たらtypeof(クラス名).Assembly.Locationみたいな感じでdll参照増やしていく感じだと思う。
+        static readonly PortableExecutableReference[] references = new[]{
+            // microlib.dll
+            // intは内部的にはSystem.Int32を利用している。
+            // メタリファレンスは何も指定しないとSystem.Int32等がインポートされていない。
+            // コンパイルエラーを回避するため、objectクラスが属するアセンブリをメタリファレンスに指定しておく。
+            MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+            // System.dll
+            MetadataReference.CreateFromFile(typeof(ObservableCollection<>).Assembly.Location),
+            // System.Core.dll
+            MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
+        };
+        
+        public IEnumerable<string> GetServiceClassNames(string path)
         {
-            throw new NotImplementedException();
+            var result = new List<string>();
+
+            // 1ファイルごとに解析しているので、別ファイルに定義したものは拾えない事に注意
+            var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(path));
+            var compilation = CSharpCompilation.Create("sample", new SyntaxTree[] { syntaxTree }, references);
+            var semanticModel = compilation.GetSemanticModel(syntaxTree);
+            var nodes = syntaxTree.GetRoot().DescendantNodes();
+
+            // ノード群からクラスに関する構文情報群を取得
+            var classSyntaxArray = nodes.OfType<ClassDeclarationSyntax>();
+            foreach (var syntax in classSyntaxArray)
+            {
+                var name = semanticModel.GetDeclaredSymbol(syntax).Name;
+                if (name.EndsWith("Service"))
+                {
+                    result.Add($"{name}");
+                }
+            }
+
+            // ノード群からインタフェースに関する構文情報群を取得
+            var interfaceSyntaxArray = nodes.OfType<InterfaceDeclarationSyntax>();
+            foreach (var syntax in interfaceSyntaxArray)
+            {
+                var name = semanticModel.GetDeclaredSymbol(syntax).Name;
+                // "先頭のIは取る"
+                name = name.StartsWith("I") ? name.Remove(0, 1) : name;
+                if (name.EndsWith("Service"))
+                {
+                    result.Add($"{name}");
+                }
+            }
+
+            return result.Distinct();   // 重複は除外
         }
     }
 }

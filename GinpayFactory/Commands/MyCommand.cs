@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using GinpayFactory.Services;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using System.IO;
 using System.Linq;
@@ -28,19 +29,34 @@ namespace GinpayFactory
             if (!await source.CheckCurrentSourceIsCSharpAsync())
             {
                 // .csではない
+                await VS.MessageBox.ShowAsync("情報", "この処理は.csのみ有効です。", OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK);
                 return;
             }
 
-            // ドキュメントからサービス名か、インタフェース名を取得（Roslynかなあ…。）
+            // ドキュメントからサービス名か、インタフェース名を取得
+            var services = roslyn.GetServiceClassNames(await source.GetActiveDocumentFilePathAsync());
 
-            //docView.FilePath
+            if (services.Count() == 0)
+            {
+                await VS.MessageBox.ShowAsync("情報", "Serviceが見つかりませんでした。", OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK);
+                return;
+            }
 
-            // 現在のソースがServiceまたはIServiceの場合、上記で見つけた箇所にAddTransientを追加する
-            // .AddTransient<ISourceService, SourceService>()
-            // (AddSingletonは別コマンド)
-
-            // ".BuildServiceProvider()"という行の上に挿入。スペースの数もここと一緒にする。
-
+            // TODO:IOptionsは？
+            foreach (var service in services)
+            {
+                 var result = await VS.MessageBox.ShowAsync("AddTransient登録", $"{service}をDI登録しますか？", OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_YESNO);
+                if (result == Microsoft.VisualStudio.VSConstants.MessageBoxResult.IDNO)
+                {
+                    return;
+                }
+                // TODO:登録
+                // 上記で見つけた箇所にAddTransientを追加する
+                // .AddTransient<ISourceService, SourceService>()
+                // (AddSingletonは別コマンド)
+                // ".BuildServiceProvider()"という行の上に挿入。スペースの数もここと一緒にする。
+            }
+            
         }
     }
 }

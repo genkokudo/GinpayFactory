@@ -45,8 +45,14 @@ namespace GinpayFactory.Services
         /// <summary>
         /// 現在のソースが.csであることを確認する
         /// </summary>
-        /// <returns></returns>
+        /// <returns>.csならtrue</returns>
         public Task<bool> CheckCurrentSourceIsCSharpAsync();
+
+        /// <summary>
+        /// 現在のソースのパスを取得する。
+        /// </summary>
+        /// <returns>現在のソースのパス</returns>
+        public Task<string> GetActiveDocumentFilePathAsync();
     }
 
     public class SourceService : ISourceService
@@ -117,11 +123,18 @@ namespace GinpayFactory.Services
             return null;
         }
 
+        public async Task<string> GetActiveDocumentFilePathAsync()
+        {
+            var currentSource = await VS.Documents.GetActiveDocumentViewAsync();
+            if (currentSource == null) return null;
+            return currentSource.FilePath;
+        }
+
         public async Task<bool> CheckCurrentSourceIsCSharpAsync()
         {
-            var docView = await VS.Documents.GetActiveDocumentViewAsync();
-            if (docView == null) return false;
-            var ex = Path.GetExtension(docView.FilePath);
+            var filePath = await GetActiveDocumentFilePathAsync();
+            if (filePath == null) return false;
+            var ex = Path.GetExtension(filePath);
             if (ex != ".cs") return false;
             return true;
         }
