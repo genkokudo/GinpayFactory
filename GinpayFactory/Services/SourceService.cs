@@ -53,6 +53,17 @@ namespace GinpayFactory.Services
         /// </summary>
         /// <returns>現在のソースのパス</returns>
         public Task<string> GetActiveDocumentFilePathAsync();
+
+        /// <summary>
+        /// 記憶しているDI登録処理を行っているクラスから、
+        /// DI登録処理を行っている箇所を探して、登録する
+        /// </summary>
+        /// <param name="di">DI登録の種類</param>
+        /// <param name="serviceName">サービス名</param>
+        /// <returns></returns>
+        public Task SeekAndInsertDiAsync(DiSubmit di, string serviceName);
+
+        // DI登録処理を行っているクラス一覧を取得
     }
 
     public class SourceService : ISourceService
@@ -138,5 +149,52 @@ namespace GinpayFactory.Services
             if (ex != ".cs") return false;
             return true;
         }
+        
+        public async Task SeekAndInsertDiAsync(DiSubmit di, string serviceName)
+        {
+            await UpdateDiSourcePathAsync();
+
+            // DIしている場所を探す（DIライブラリ別）
+            // 実際にVSで開いたらいいのかな？
+            var view = await VS.Documents.OpenAsync(DiSourcePath);
+
+            // 何文字目からが登録処理か
+            var text = File.ReadAllText(DiSourcePath);
+            var position = text.IndexOf(Option.Value.DiLibrary.GetStringValue());
+
+            // 入れてみる
+            view.TextBuffer.Insert(position, string.Format(di.GetStringValue(), serviceName));
+
+            // TODO:結果
+            //hogeIoc.Default.ConfigureServices(new ServiceCollection()
+
+        }
+    }
+
+    /// <summary>
+    /// DI登録の種類
+    /// </summary>
+    public enum DiSubmit
+    {
+        /// <summary>
+        /// Transient
+        /// </summary>
+        [StringValue(".AddTransient<I{0}, {0}>()")]
+        Transient = 1,
+        /// <summary>
+        /// Singleton
+        /// </summary>
+        [StringValue(".AddSingleton<I{0}, {0}>()")]
+        Singleton = 2,
+        /// <summary>
+        /// Option
+        /// </summary>
+        [StringValue("")]
+        Option = 3,
+        /// <summary>
+        /// その他一般的なオブジェクトを登録
+        /// </summary>
+        [StringValue("")]
+        GeneralObject = 4
     }
 }

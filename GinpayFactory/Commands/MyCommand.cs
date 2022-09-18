@@ -48,13 +48,17 @@ namespace GinpayFactory
                  var result = await VS.MessageBox.ShowAsync("AddTransient登録", $"{service}をDI登録しますか？", OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_YESNO);
                 if (result == Microsoft.VisualStudio.VSConstants.MessageBoxResult.IDNO)
                 {
-                    return;
+                    continue;
                 }
                 // TODO:登録
                 // 上記で見つけた箇所にAddTransientを追加する
                 // .AddTransient<ISourceService, SourceService>()
                 // (AddSingletonは別コマンド)
                 // ".BuildServiceProvider()"という行の上に挿入。スペースの数もここと一緒にする。
+                await source.SeekAndInsertDiAsync(DiSubmit.Transient, service);
+
+
+                Console.WriteLine();
             }
             
         }
