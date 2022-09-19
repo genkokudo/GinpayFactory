@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using System.Windows.Shapes;
 using Path = System.IO.Path;
 
 namespace GinpayFactory.Services
@@ -160,14 +162,56 @@ namespace GinpayFactory.Services
 
             // 何文字目からが登録処理か
             var text = File.ReadAllText(DiSourcePath);
-            var position = text.IndexOf(Option.Value.DiLibrary.GetStringValue());
+            var keyword = Option.Value.DiLibrary.GetStringValue();
+            var position = text.IndexOf(keyword);
+
+            // スペースがあれば揃える
+            var targetLine = GetLineText(text, keyword);
+            var spaces = GetIndentSpaces(targetLine);
 
             // 入れてみる
-            view.TextBuffer.Insert(position, string.Format(di.GetStringValue(), serviceName));
+            view.TextBuffer.Insert(position, $"{string.Format(di.GetStringValue(), serviceName)}\r\n{spaces}");  // "\n"とか入れたらいいんじゃない？
+            
+        }
 
-            // TODO:結果
-            //hogeIoc.Default.ConfigureServices(new ServiceCollection()
+        /// <summary>
+        /// 行からインデントのスペースを取得する。
+        /// インデントにTabを使用しているソースは想定しない。
+        /// </summary>
+        /// <param name="line">1行のテキスト</param>
+        /// <returns></returns>
+        private string GetIndentSpaces(string line)
+        {
+            var count = 0;
+            foreach (var item in line)
+            {
+                if (item != ' ')
+                {
+                    break;
+                }
+                count++;
+            }
+            return new string(' ', count);
+        }
 
+        /// <summary>
+        /// 1つのテキストから特定のキーワードを含む行を取り出す。
+        /// 最初に見つかった行だけ取り出す。
+        /// </summary>
+        /// <param name="text">テキスト全部</param>
+        /// <param name="keyword">探す文字列</param>
+        /// <returns></returns>
+        private string GetLineText(string text, string keyword)
+        {
+            var lines = text.Replace("\r\n", "\n").Replace("\r", "\n").Split('\n');
+            foreach (var line in lines)
+            {
+                if (line.Contains(keyword))
+                {
+                    return line;
+                }
+            }
+            return null;
         }
     }
 
