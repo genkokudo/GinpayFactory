@@ -54,7 +54,6 @@ namespace GinpayFactory
                 // 上記で見つけた箇所にAddTransientを追加する
                 // .AddTransient<ISourceService, SourceService>()
                 // (AddSingletonは別コマンド)
-                // ".BuildServiceProvider()"という行の上に挿入。スペースの数もここと一緒にする。
                 await source.SeekAndInsertDiAsync(DiSubmit.Transient, service);
 
 

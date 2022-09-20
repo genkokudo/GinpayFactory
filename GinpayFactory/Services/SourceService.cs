@@ -3,9 +3,11 @@ using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Shapes;
+using static System.Net.Mime.MediaTypeNames;
 using Path = System.IO.Path;
 
 namespace GinpayFactory.Services
@@ -64,6 +66,13 @@ namespace GinpayFactory.Services
         /// <param name="serviceName">サービス名</param>
         /// <returns></returns>
         public Task SeekAndInsertDiAsync(DiSubmit di, string serviceName);
+
+        /// <summary>
+        /// ソースコードからコメントを除外する。
+        /// </summary>
+        /// <param name="text">ソースコード</param>
+        /// <returns>コメントが除外されたソースコード</returns>
+        public string RemoveComments(string text);
 
         // DI登録処理を行っているクラス一覧を取得
     }
@@ -125,7 +134,8 @@ namespace GinpayFactory.Services
             // CommunityToolkitのみ対応。
             foreach (var cs in csList)
             {
-                var text = File.ReadAllText(cs);
+                // コメントは除外
+                var text = RemoveComments(File.ReadAllText(cs));
                 if (text.Contains(Option.Value.DiLibrary.GetStringValue()))
                 {
                     // 見つかったら覚えておく
@@ -134,6 +144,17 @@ namespace GinpayFactory.Services
             }
 
             return null;
+        }
+
+
+        public string RemoveComments(string text)
+        {
+            // コメントを除外したソースにする。
+            // 文字列に"//"とか"/*"とか入ってるのは知らない…。
+
+            // 優先順は"*/", "//", "/*"のようだ。
+            var re = @"(@(?:""[^""]*"")+|""(?:[^""\n\\]+|\\.)*""|'(?:[^'\n\\]+|\\.)*')|//.*|/\*(?s:.*?)\*/";
+            return Regex.Replace(text, re, "$1");
         }
 
         public async Task<string> GetActiveDocumentFilePathAsync()
@@ -161,7 +182,7 @@ namespace GinpayFactory.Services
             var view = await VS.Documents.OpenAsync(DiSourcePath);
 
             // 何文字目からが登録処理か
-            var text = File.ReadAllText(DiSourcePath);
+            var text = RemoveComments(File.ReadAllText(DiSourcePath));
             var keyword = Option.Value.DiLibrary.GetStringValue();
             var position = text.IndexOf(keyword);
 
