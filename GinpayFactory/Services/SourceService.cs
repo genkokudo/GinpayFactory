@@ -286,6 +286,7 @@ namespace GinpayFactory.Services
                     continue;
                 }
 
+                // TODO:IHostの場合、登録サービスのオブジェクト名を"service"としているが、その名前ではない変なプロジェクトに当たると厄介なのでOptionにカスタム文字列を設定できるようにする。
                 // TODO:AddSingletonコマンドを作成する
                 // TODO:一般クラス登録も。
                 // RoslynService:開いてるソースから全クラス取得して、そのリストを得る。
