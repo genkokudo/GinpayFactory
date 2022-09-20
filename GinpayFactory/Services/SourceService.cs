@@ -1,5 +1,7 @@
-﻿using GinpayFactory.Enums;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using GinpayFactory.Enums;
 using Microsoft.Extensions.Options;
+using Microsoft.VisualStudio.Shell.Interop;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,6 +14,9 @@ using Path = System.IO.Path;
 
 namespace GinpayFactory.Services
 {
+    // サービス登録してる箇所がソリューション内で1つであることが前提。
+    // 同一ソースでDI登録箇所が複数あり、片方コメントアウトされている場合までは面倒を見られない。ソースファイルを決定するまではコメントアウト考慮。
+
     public class DiOption
     {
         /// <summary>
@@ -26,11 +31,6 @@ namespace GinpayFactory.Services
     /// </summary>
     public interface ISourceService
     {
-        // サービス登録してる箇所がソリューション内で1つであることが前提。
-        // もし複数ある想定なら？
-        // →現在編集中のプロジェクトを取って、その中で探す
-        // →全部列挙して、その中から対象をユーザに選択させる
-
         /// <summary>
         /// ソリューション内の.csファイルのフルパスを全て取得する。
         /// </summary>
@@ -45,7 +45,32 @@ namespace GinpayFactory.Services
         /// <returns></returns>
         public Task UpdateDiSourcePathAsync();
 
-        // VS拡張依存
+        /// <summary>
+        /// ソースコードからコメントを除外する。
+        /// </summary>
+        /// <param name="text">ソースコード</param>
+        /// <returns>コメントが除外されたソースコード</returns>
+        public string RemoveComments(string text);
+
+        /// <summary>
+        /// 行からインデントのスペースを取得する。
+        /// インデントにTabを使用しているソースは想定しない。
+        /// </summary>
+        /// <param name="line">1行のテキスト</param>
+        /// <returns></returns>
+        public string GetIndentSpaces(string line);
+
+        /// <summary>
+        /// 1つのテキストから特定のキーワードを含む行を取り出す。
+        /// 最初に見つかった行だけ取り出す。
+        /// </summary>
+        /// <param name="text">テキスト全部</param>
+        /// <param name="keyword">探す文字列</param>
+        /// <returns></returns>
+        public string GetLineText(string text, string keyword);
+
+
+        // ---------- ここから下はVS拡張依存 ----------
         /// <summary>
         /// 現在のソースが.csであることを確認する
         /// </summary>
@@ -53,7 +78,7 @@ namespace GinpayFactory.Services
         public Task<bool> CheckCurrentSourceIsCSharpAsync();
 
         /// <summary>
-        /// 現在のソースのパスを取得する。
+        /// 現在VSに表示しているソースのパスを取得する。
         /// </summary>
         /// <returns>現在のソースのパス</returns>
         public Task<string> GetActiveDocumentFilePathAsync();
@@ -68,13 +93,12 @@ namespace GinpayFactory.Services
         public Task SeekAndInsertDiAsync(DiSubmit di, string serviceName);
 
         /// <summary>
-        /// ソースコードからコメントを除外する。
+        /// ソリューション内から設定されているフレームワークでDI登録を行っている箇所を探す。
+        /// 現在のソースからServiceクラスまたはIServiceインタフェースを探し、上記の場所に登録する。
         /// </summary>
-        /// <param name="text">ソースコード</param>
-        /// <returns>コメントが除外されたソースコード</returns>
-        public string RemoveComments(string text);
-
-        // DI登録処理を行っているクラス一覧を取得
+        /// <param name="diSubmit">DI登録の種類</param>
+        /// <returns></returns>
+        public Task AddServiceAsync(DiSubmit diSubmit);
     }
 
     public class SourceService : ISourceService
@@ -85,11 +109,13 @@ namespace GinpayFactory.Services
         /// </summary>
         public string DiSourcePath { get; private set; }
 
-        public IOptions<DiOption> Option { get; set; }
+        private IOptions<DiOption> Option { get; set; }
+        private IRoslynService Roslyn { get; set; }
 
-        public SourceService(IOptions<DiOption> option)
+        public SourceService(IOptions<DiOption> option, IRoslynService roslyn)
         {
             Option = option;
+            Roslyn = roslyn;
         }
 
         public async Task<List<string>> GetSourcePathListAsync(bool excludeObj = true)
@@ -182,7 +208,7 @@ namespace GinpayFactory.Services
             var view = await VS.Documents.OpenAsync(DiSourcePath);
 
             // 何文字目からが登録処理か
-            var text = RemoveComments(File.ReadAllText(DiSourcePath));
+            var text = File.ReadAllText(DiSourcePath);
             var keyword = Option.Value.DiLibrary.GetStringValue();
             var position = text.IndexOf(keyword);
 
@@ -191,17 +217,13 @@ namespace GinpayFactory.Services
             var spaces = GetIndentSpaces(targetLine);
 
             // 入れてみる
-            view.TextBuffer.Insert(position, $"{string.Format(di.GetStringValue(), serviceName)}\r\n{spaces}");  // "\n"とか入れたらいいんじゃない？
+            var service = Option.Value.DiLibrary == DiLibrary.CommunityToolkit ? string.Empty : "services";
+            var semicolon = Option.Value.DiLibrary == DiLibrary.CommunityToolkit ? string.Empty : ";";
+            view.TextBuffer.Insert(position, $"{string.Format(di.GetStringValue(), serviceName, service, semicolon)}\r\n{spaces}");
             
         }
 
-        /// <summary>
-        /// 行からインデントのスペースを取得する。
-        /// インデントにTabを使用しているソースは想定しない。
-        /// </summary>
-        /// <param name="line">1行のテキスト</param>
-        /// <returns></returns>
-        private string GetIndentSpaces(string line)
+        public string GetIndentSpaces(string line)
         {
             var count = 0;
             foreach (var item in line)
@@ -215,14 +237,7 @@ namespace GinpayFactory.Services
             return new string(' ', count);
         }
 
-        /// <summary>
-        /// 1つのテキストから特定のキーワードを含む行を取り出す。
-        /// 最初に見つかった行だけ取り出す。
-        /// </summary>
-        /// <param name="text">テキスト全部</param>
-        /// <param name="keyword">探す文字列</param>
-        /// <returns></returns>
-        private string GetLineText(string text, string keyword)
+        public string GetLineText(string text, string keyword)
         {
             var lines = text.Replace("\r\n", "\n").Replace("\r", "\n").Split('\n');
             foreach (var line in lines)
@@ -234,32 +249,49 @@ namespace GinpayFactory.Services
             }
             return null;
         }
-    }
 
-    /// <summary>
-    /// DI登録の種類
-    /// </summary>
-    public enum DiSubmit
-    {
         /// <summary>
-        /// Transient
+        /// ソリューション内から設定されているフレームワークでDI登録を行っている箇所を探す。
+        /// 現在のソースからServiceクラスまたはIServiceインタフェースを探し、上記の場所に登録する。
         /// </summary>
-        [StringValue(".AddTransient<I{0}, {0}>()")]
-        Transient = 1,
-        /// <summary>
-        /// Singleton
-        /// </summary>
-        [StringValue(".AddSingleton<I{0}, {0}>()")]
-        Singleton = 2,
-        /// <summary>
-        /// Option
-        /// </summary>
-        [StringValue("")]
-        Option = 3,
-        /// <summary>
-        /// その他一般的なオブジェクトを登録
-        /// </summary>
-        [StringValue("")]
-        GeneralObject = 4
+        /// <param name="diSubmit">DI登録の種類</param>
+        /// <returns></returns>
+        public async Task AddServiceAsync(DiSubmit diSubmit)
+        {
+            // ソリューション内の.csから、DI登録しているクラスを探す
+            await UpdateDiSourcePathAsync();
+
+            // 現在のソースが.csであることを確認する
+            if (!await CheckCurrentSourceIsCSharpAsync())
+            {
+                // .csではない
+                await VS.MessageBox.ShowAsync("情報", "この処理は.csのみ有効です。", OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK);
+                return;
+            }
+
+            // ドキュメントからサービス名か、インタフェース名を取得
+            var services = Roslyn.GetServiceClassNames(await GetActiveDocumentFilePathAsync());
+            if (services.Count() == 0)
+            {
+                await VS.MessageBox.ShowAsync("情報", "Serviceが見つかりませんでした。", OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK);
+                return;
+            }
+
+            // ソースに登録処理を追加する
+            foreach (var service in services)
+            {
+                var result = await VS.MessageBox.ShowAsync("AddTransient登録", $"{service}をDI登録しますか？", OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_YESNO);
+                if (result == Microsoft.VisualStudio.VSConstants.MessageBoxResult.IDNO)
+                {
+                    continue;
+                }
+
+                // TODO:AddSingletonコマンドを作成する
+                // TODO:一般クラス登録も。
+                // RoslynService:開いてるソースから全クラス取得して、そのリストを得る。
+                // リストをforeachで回して、登録するか順番にダイアログで問う。
+                await SeekAndInsertDiAsync(diSubmit, service);
+            }
+        }
     }
 }

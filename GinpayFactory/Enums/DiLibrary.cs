@@ -9,6 +9,12 @@
     {
         /// <summary>CommunityToolkit</summary>
         [StringValue(".BuildServiceProvider()")] // "Ioc.Default.ConfigureServices"よりこっちの方がやりやすい
-        CommunityToolkit,
+        CommunityToolkit = 1,
+        /// <summary>
+        /// IHost版
+        /// CommunityToolkit
+        /// </summary>
+        [StringValue("services.AddTransient")]  // 結構乱暴な決め打ち
+        HostedCommunityToolkit = 2,
     }
 }

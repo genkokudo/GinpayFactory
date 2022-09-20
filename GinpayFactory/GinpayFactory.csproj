@@ -48,6 +48,7 @@
     <Compile Include="Commands\GenkokuCommand.cs" />
     <Compile Include="Commands\SexyCommand.cs" />
     <Compile Include="Enums\DiLibrary.cs" />
+    <Compile Include="Enums\DiSubmit.cs" />
     <Compile Include="Enums\StringValueAttribute.cs" />
     <Compile Include="Options\GinpayOption.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
