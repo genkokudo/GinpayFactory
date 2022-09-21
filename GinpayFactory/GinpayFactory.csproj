@@ -45,6 +45,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Commands\AddClassCommand.cs" />
+    <Compile Include="Commands\AddSingletonCommand.cs" />
+    <Compile Include="Commands\AddTransientCommand.cs" />
+    <Compile Include="Commands\GenerateAssertCommand.cs" />
     <Compile Include="Commands\GenkokuCommand.cs" />
     <Compile Include="Commands\SexyCommand.cs" />
     <Compile Include="Enums\DiLibrary.cs" />

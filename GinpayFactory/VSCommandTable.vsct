@@ -13,11 +13,12 @@
         <Parent guid="VSMainMenu" id="Tools"/>
       </Group>
       
-      <!-- XAML右クリにもcs右クリにも出す、この場合は同じ値のGroupタグを複数定義する。 -->
-      <Group guid="GinpayFactory" id="MyContextMenuGroup" priority="0x0700">
+      <!-- XAML右クリに出す -->
+      <Group guid="GinpayFactory" id="MyXamlMenuGroup" priority="0x0700">
         <Parent guid="GuidVisualStudioXAMLWindowContextMenu" id="IDVisualStudioXAMLWindowContextMenu"/>
       </Group>
-      <Group guid="GinpayFactory" id="MyContextMenuGroup" priority="0x0700">
+      <!-- cs右クリに出す（両方に出す場合は同じ値のGroupタグを複数定義する。） -->
+      <Group guid="GinpayFactory" id="MyXamarinMenuGroup" priority="0x0700">
         <Parent guid="GuidVisualStudioXamarinWindowContextMenu" id="IDVisualStudioXamarinWindowContextMenu"/>
       </Group>
     </Groups>
@@ -44,7 +45,7 @@
 
       <!-- 今作ってるやつ
       <Button guid="GinpayFactory" id="SexyCommand" priority="0x0200" type="Button">
-        <Parent guid="GinpayFactory" id="MyContextMenuGroup" />
+        <Parent guid="GinpayFactory" id="MyXamlMenuGroup" />
         <Icon guid="ImageCatalogGuid" id="PasteAppend" />
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
@@ -52,6 +53,42 @@
           <LocCanonicalName>.GinpayFactory.SexyCommand</LocCanonicalName>
         </Strings>
       </Button> -->
+      <Button guid="GinpayFactory" id="AddTransientCommand" priority="0x0400" type="Button">
+        <Parent guid="GinpayFactory" id="MyXamarinMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="PasteAppend" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>このServiceをTransientで登録する</ButtonText>
+          <LocCanonicalName>.GinpayFactory.AddTransientCommand</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="GinpayFactory" id="AddSingletonCommand" priority="0x0400" type="Button">
+        <Parent guid="GinpayFactory" id="MyXamarinMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="PasteAppend" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>このServiceをSingletonで登録する</ButtonText>
+          <LocCanonicalName>.GinpayFactory.AddSingletonCommand</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="GinpayFactory" id="AddClassCommand" priority="0x0400" type="Button">
+        <Parent guid="GinpayFactory" id="MyXamarinMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="PasteAppend" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>このClassをTransientで登録する</ButtonText>
+          <LocCanonicalName>.GinpayFactory.AddClassCommand</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="GinpayFactory" id="GenerateAssertCommand" priority="0x0400" type="Button">
+        <Parent guid="GinpayFactory" id="MyXamarinMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="PasteAppend" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>このClassのAssertを生成する</ButtonText>
+          <LocCanonicalName>.GinpayFactory.GenerateAssertCommand</LocCanonicalName>
+        </Strings>
+      </Button>
       
     </Buttons>
   </Commands>
@@ -61,10 +98,15 @@
     <GuidSymbol name="GinpayFactory" value="{773d7868-2bb7-4fc4-9df8-4b6dc12c2de2}">
       <IDSymbol name="MyMenuGroup" value="0x0001" />
       <IDSymbol name="MyWindowGroup" value="0x0002" />
+      <IDSymbol name="MyXamlMenuGroup" value="0x0003" />
+      <IDSymbol name="MyXamarinMenuGroup" value="0x0004" />
       <IDSymbol name="MyCommand" value="0x0100" />
-      <IDSymbol name="GenkokuCommand" value="0x0300" />
-      <IDSymbol name="MyContextMenuGroup" value="0x0003" />
       <IDSymbol name="SexyCommand" value="0x0200" />
+      <IDSymbol name="GenkokuCommand" value="0x0300" />
+      <IDSymbol name="AddTransientCommand" value="0x0400" />
+      <IDSymbol name="AddSingletonCommand" value="0x0500" />
+      <IDSymbol name="AddClassCommand" value="0x0600" />
+      <IDSymbol name="GenerateAssertCommand" value="0x0700" />
     </GuidSymbol>
 
     <!-- XAMLの右クリックメニュー -->

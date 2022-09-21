@@ -24,5 +24,9 @@ namespace GinpayFactory
         public const int MyCommand = 0x0100;
         public const int SexyCommand = 0x0200;
         public const int GenkokuCommand = 0x0300;
+        public const int AddTransientCommand = 0x0400;
+        public const int AddSingletonCommand = 0x0500;
+        public const int AddClassCommand = 0x0600;
+        public const int GenerateAssertCommand = 0x0700;
     }
 }
