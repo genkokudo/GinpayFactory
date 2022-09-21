@@ -18,11 +18,17 @@ namespace GinpayFactory
         [DefaultValue("DeeplApiKey")]
         public string ApiKey { get; set; } = "DeeplApiKey";
 
-        [Category("DeepLの設定")]
+        [Category("DIの設定")]
         [DisplayName("DI Library")]
         [Description("使用するDIライブラリ")]
         [DefaultValue(DiLibrary.CommunityToolkit)]
         public DiLibrary DiLibrary { get; set; } = DiLibrary.CommunityToolkit;
+
+        [Category("DIの設定")]
+        [DisplayName("DI services name")]
+        [Description("DI登録を行うオブジェクトの名前")]
+        [DefaultValue("services")]
+        public string DiServicesName { get; set; } = "services";
 
         //[Category("意味のない設定")]
         //[DisplayName("Like")]
