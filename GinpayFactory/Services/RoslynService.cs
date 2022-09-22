@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Windows.Shapes;
 
 namespace GinpayFactory.Services
 {
@@ -23,6 +24,13 @@ namespace GinpayFactory.Services
         /// <param name="path"></param>
         /// <returns>見つかったサービス名全て</returns>
         public IEnumerable<string> GetServiceClassNames(string path);
+
+        /// <summary>
+        /// ソース内のクラス名を全て取得する
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>見つかったクラス名全て</returns>
+        public IEnumerable<string> GetAllClassNames(string path);
     }
 
     public class RoslynService : IRoslynService
@@ -41,33 +49,65 @@ namespace GinpayFactory.Services
             // System.Core.dll
             MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
         };
-        
-        public IEnumerable<string> GetServiceClassNames(string path)
+
+        // 1ファイルごとに解析しているので、別ファイルに定義したものは拾えない事に注意
+        /// <summary>
+        /// ソース解析に必要なものをまとめたクラス
+        /// </summary>
+        private class CSharpAnalysis
+        {
+            public SyntaxTree SyntaxTree { get; set; }
+            public CSharpCompilation Compilation { get; set; }
+            public SemanticModel SemanticModel { get; set; }
+            public IEnumerable<SyntaxNode> Nodes { get; set; }
+
+            /// <summary>
+            /// 解析する.csのフルパス
+            /// </summary>
+            /// <param name="fullpath"></param>
+            public CSharpAnalysis(string fullpath)
+            {
+                SyntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(fullpath));
+                Compilation = CSharpCompilation.Create("sample", new SyntaxTree[] { SyntaxTree }, references);
+                SemanticModel = Compilation.GetSemanticModel(SyntaxTree);
+                Nodes = SyntaxTree.GetRoot().DescendantNodes();
+            }
+        }
+
+        /// <summary>
+        /// ソース内のクラス名をすべて取得
+        /// </summary>
+        /// <param name="analysis">ソース解析情報</param>
+        /// <returns>ソース内の全てのクラス名</returns>
+        private IEnumerable<string> GetClassNames(CSharpAnalysis analysis)
         {
             var result = new List<string>();
 
-            // 1ファイルごとに解析しているので、別ファイルに定義したものは拾えない事に注意
-            var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(path));
-            var compilation = CSharpCompilation.Create("sample", new SyntaxTree[] { syntaxTree }, references);
-            var semanticModel = compilation.GetSemanticModel(syntaxTree);
-            var nodes = syntaxTree.GetRoot().DescendantNodes();
-
             // ノード群からクラスに関する構文情報群を取得
-            var classSyntaxArray = nodes.OfType<ClassDeclarationSyntax>();
+            var classSyntaxArray = analysis.Nodes.OfType<ClassDeclarationSyntax>();
             foreach (var syntax in classSyntaxArray)
             {
-                var name = semanticModel.GetDeclaredSymbol(syntax).Name;
-                if (name.EndsWith("Service"))
-                {
-                    result.Add($"{name}");
-                }
+                var name = analysis.SemanticModel.GetDeclaredSymbol(syntax).Name;
+                result.Add($"{name}");
             }
 
+            return result.Distinct();   // 重複は除外
+        }
+
+        /// <summary>
+        /// ソース内のインタフェース名をすべて取得
+        /// </summary>
+        /// <param name="analysis">ソース解析情報</param>
+        /// <returns>ソース内の全てのインタフェース名</returns>
+        private IEnumerable<string> GetInterfaceNames(CSharpAnalysis analysis)
+        {
+            var result = new List<string>();
+
             // ノード群からインタフェースに関する構文情報群を取得
-            var interfaceSyntaxArray = nodes.OfType<InterfaceDeclarationSyntax>();
+            var interfaceSyntaxArray = analysis.Nodes.OfType<InterfaceDeclarationSyntax>();
             foreach (var syntax in interfaceSyntaxArray)
             {
-                var name = semanticModel.GetDeclaredSymbol(syntax).Name;
+                var name = analysis.SemanticModel.GetDeclaredSymbol(syntax).Name;
                 // "先頭のIは取る"
                 name = name.StartsWith("I") ? name.Remove(0, 1) : name;
                 if (name.EndsWith("Service"))
@@ -77,6 +117,30 @@ namespace GinpayFactory.Services
             }
 
             return result.Distinct();   // 重複は除外
+        }
+
+        public IEnumerable<string> GetServiceClassNames(string path)
+        {
+            var result = new List<string>();
+
+            // ソース解析
+            var analysis = new CSharpAnalysis(path);
+
+            // クラス名を全て取得
+            // 末尾がServiceでないものは除外
+            result.AddRange(GetClassNames(analysis).Where(x => x.EndsWith("Service")));
+
+            // インタフェース名を全て取得
+            // 末尾がServiceでないものは除外
+            // 先頭の"I"は取る
+            result.AddRange(GetInterfaceNames(analysis).Select(x => x.StartsWith("I") ? x.Remove(0, 1) : x).Where(x => x.EndsWith("Service")));
+
+            return result.Distinct();   // 重複は除外
+        }
+
+        public IEnumerable<string> GetAllClassNames(string path)
+        {
+            return GetClassNames(new CSharpAnalysis(path));
         }
     }
 }

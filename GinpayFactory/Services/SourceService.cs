@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using Community.VisualStudio.Toolkit;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using GinpayFactory.Enums;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -274,29 +275,45 @@ namespace GinpayFactory.Services
                 return;
             }
 
-            // ドキュメントからサービス名か、インタフェース名を取得
-            var services = Roslyn.GetServiceClassNames(await GetActiveDocumentFilePathAsync());
-            if (services.Count() == 0)
+            // 一般クラス登録
+            if (diSubmit == DiSubmit.GeneralClass)
             {
-                await VS.MessageBox.ShowAsync("情報", "Serviceが見つかりませんでした。", OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK);
+                var classes = Roslyn.GetAllClassNames(await GetActiveDocumentFilePathAsync());
+                await SubmitAsync(diSubmit, classes);
                 return;
             }
-
-            // ソースに登録処理を追加する
-            foreach (var service in services)
+            else
             {
-                var result = await VS.MessageBox.ShowAsync("AddTransient登録", $"{service}をDI登録しますか？", OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_YESNO);
+                // サービス登録
+                var services = Roslyn.GetServiceClassNames(await GetActiveDocumentFilePathAsync());
+                if (services.Count() == 0)
+                {
+                    await VS.MessageBox.ShowAsync("情報", "Serviceが見つかりませんでした。", OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK);
+                    return;
+                }
+
+                // ソースに登録処理を追加する
+                await SubmitAsync(diSubmit, services);
+            }
+        }
+
+        /// <summary>
+        /// 取得したクラス名全てについて、DI登録するかダイアログで確認する。
+        /// Yesを選択した場合は登録する。
+        /// </summary>
+        /// <param name="diSubmit">登録種類</param>
+        /// <param name="names">クラス名</param>
+        /// <returns></returns>
+        private async Task SubmitAsync(DiSubmit diSubmit, IEnumerable<string> names)
+        {
+            foreach (var name in names)
+            {
+                var result = await VS.MessageBox.ShowAsync($"{diSubmit}登録", $"{name}をDI登録しますか？", OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_YESNO);
                 if (result == Microsoft.VisualStudio.VSConstants.MessageBoxResult.IDNO)
                 {
                     continue;
                 }
-
-                // TODO:IHostの場合、登録サービスのオブジェクト名を"service"としているが、その名前ではない変なプロジェクトに当たると厄介なのでOptionにカスタム文字列を設定できるようにする。
-                // TODO:AddSingletonコマンドを作成する
-                // TODO:一般クラス登録も。
-                // RoslynService:開いてるソースから全クラス取得して、そのリストを得る。
-                // リストをforeachで回して、登録するか順番にダイアログで問う。
-                await SeekAndInsertDiAsync(diSubmit, service);
+                await SeekAndInsertDiAsync(diSubmit, name);
             }
         }
     }

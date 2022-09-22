@@ -36,7 +36,8 @@ namespace GinpayFactory
             });
             var diOption = Options.Create(new DiOption
             {
-                DiLibrary = general.DiLibrary
+                DiLibrary = general.DiLibrary,
+                DiServicesName = general.DiServicesName
             });
 
             // 作成したサービスをDIできるように登録する
