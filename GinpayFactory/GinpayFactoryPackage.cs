@@ -56,6 +56,7 @@ namespace GinpayFactory
             {
                 Ioc.Default.GetService<IOptions<DeeplOption>>().Value.ApiKey = obj.ApiKey;
                 Ioc.Default.GetService<IOptions<DiOption>>().Value.DiLibrary = obj.DiLibrary;
+                Ioc.Default.GetService<IOptions<DiOption>>().Value.DiServicesName = obj.DiServicesName;
             };
         }
 

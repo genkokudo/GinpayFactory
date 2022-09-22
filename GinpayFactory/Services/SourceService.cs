@@ -23,6 +23,11 @@ namespace GinpayFactory.Services
         /// DIに使用しているライブラリ
         /// </summary>
         public DiLibrary DiLibrary { get; set; }
+
+        /// <summary>
+        /// DI登録を行っているservicesインスタンス名
+        /// </summary>
+        public string DiServicesName { get; set; }
     }
 
     /// <summary>
@@ -217,7 +222,7 @@ namespace GinpayFactory.Services
             var spaces = GetIndentSpaces(targetLine);
 
             // 入れてみる
-            var service = Option.Value.DiLibrary == DiLibrary.CommunityToolkit ? string.Empty : "services";
+            var service = Option.Value.DiLibrary == DiLibrary.CommunityToolkit ? string.Empty : Option.Value.DiServicesName;
             var semicolon = Option.Value.DiLibrary == DiLibrary.CommunityToolkit ? string.Empty : ";";
             view.TextBuffer.Insert(position, $"{string.Format(di.GetStringValue(), serviceName, service, semicolon)}\r\n{spaces}");
             
