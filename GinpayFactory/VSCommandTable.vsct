@@ -14,14 +14,30 @@
       </Group>
       
       <!-- XAML右クリに出す -->
-      <Group guid="GinpayFactory" id="MyXamlMenuGroup" priority="0x0700">
+      <Group guid="GinpayFactory" id="MyXamlMenuGroup" priority="0x0600">
         <Parent guid="GuidVisualStudioXAMLWindowContextMenu" id="IDVisualStudioXAMLWindowContextMenu"/>
       </Group>
       <!-- cs右クリに出す（両方に出す場合は同じ値のGroupタグを複数定義する。） -->
-      <Group guid="GinpayFactory" id="MyXamarinMenuGroup" priority="0x0700">
+      <Group guid="GinpayFactory" id="MyXamarinMenuGroup" priority="0x0600">
         <Parent guid="GuidVisualStudioXamarinWindowContextMenu" id="IDVisualStudioXamarinWindowContextMenu"/>
       </Group>
+
+		<!-- サブメニュー用グループ -->
+		<Group guid="GinpayFactory" id="DiSubMenuGroup" priority="0x0000">
+			<Parent guid="GinpayFactory" id="DiSubMenu"/>
+		</Group>
     </Groups>
+
+	<!-- サブメニューを作る -->
+	  <Menus>
+		  <Menu guid="GinpayFactory" id="DiSubMenu" priority="0x0100" type="Menu">
+			  <Parent guid="GinpayFactory" id="MyXamarinMenuGroup"/>
+			  <Strings>
+				  <ButtonText>DI登録</ButtonText>
+				  <CommandName>DI Submit Menu</CommandName>
+			  </Strings>
+		  </Menu>
+	  </Menus>
 
     <Buttons>
       <Button guid="GinpayFactory" id="MyCommand" priority="0x0100" type="Button">
@@ -54,7 +70,7 @@
         </Strings>
       </Button> -->
       <Button guid="GinpayFactory" id="AddTransientCommand" priority="0x0400" type="Button">
-        <Parent guid="GinpayFactory" id="MyXamarinMenuGroup" />
+        <Parent guid="GinpayFactory" id="DiSubMenuGroup" />
         <Icon guid="ImageCatalogGuid" id="PasteAppend" />
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
@@ -63,7 +79,7 @@
         </Strings>
       </Button>
       <Button guid="GinpayFactory" id="AddSingletonCommand" priority="0x0400" type="Button">
-        <Parent guid="GinpayFactory" id="MyXamarinMenuGroup" />
+        <Parent guid="GinpayFactory" id="DiSubMenuGroup" />
         <Icon guid="ImageCatalogGuid" id="PasteAppend" />
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
@@ -72,7 +88,7 @@
         </Strings>
       </Button>
       <Button guid="GinpayFactory" id="AddClassCommand" priority="0x0400" type="Button">
-        <Parent guid="GinpayFactory" id="MyXamarinMenuGroup" />
+        <Parent guid="GinpayFactory" id="DiSubMenuGroup" />
         <Icon guid="ImageCatalogGuid" id="PasteAppend" />
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
@@ -107,6 +123,8 @@
       <IDSymbol name="AddSingletonCommand" value="0x0500" />
       <IDSymbol name="AddClassCommand" value="0x0600" />
       <IDSymbol name="GenerateAssertCommand" value="0x0700" />
+		<IDSymbol name="DiSubMenu" value="0x1100"/>
+		<IDSymbol name="DiSubMenuGroup" value="0x1150"/>
     </GuidSymbol>
 
     <!-- XAMLの右クリックメニュー -->
