@@ -78,12 +78,16 @@ namespace GinpayFactory.Services
                         else if (parent is ConstructorDeclarationSyntax)
                         {
                             // コンストラクタの場合
-                            constructor(parent);
+                            var con = parent as ConstructorDeclarationSyntax;
+                            DiMethodName = DiClassName = con.Identifier.Text;
                         }
                         else if (parent is MethodDeclarationSyntax)
                         {
                             // メソッド定義の場合
-                            method(parent);
+                            var mtd = parent as MethodDeclarationSyntax;
+                            var cls = mtd.Parent as ClassDeclarationSyntax;
+                            DiClassName = cls.Identifier.Text;
+                            DiMethodName = mtd.Identifier.Text;
                         }
                     }
                 }
@@ -92,6 +96,13 @@ namespace GinpayFactory.Services
             base.Visit(node);
         }
 
+        /// <summary>
+        /// 引数にIServiceCollectionがあるかを確認する。
+        /// あればそのメソッドをDI登録メソッドとして記憶する。
+        /// </summary>
+        /// <param name="Parameters"></param>
+        /// <param name="classSyntax"></param>
+        /// <param name="IdentifierText"></param>
         private void FindServiceCollectionParameter(SeparatedSyntaxList<ParameterSyntax> Parameters, ClassDeclarationSyntax classSyntax, string IdentifierText)
         {
             foreach (var parameter in Parameters)
