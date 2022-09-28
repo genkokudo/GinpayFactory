@@ -114,6 +114,10 @@ namespace GinpayFactory.Services
         /// コメントアウトしていても認識するので注意
         /// </summary>
         public string DiSourcePath { get; private set; }
+        /// <summary>DI登録を行っているクラス</summary>
+        public string DiClass { get; private set; }
+        /// <summary>DI登録を行っているメソッド</summary>
+        public string DiMethod { get; private set; }
 
         private IOptions<DiOption> Option { get; set; }
         private IRoslynService Roslyn { get; set; }
@@ -163,17 +167,33 @@ namespace GinpayFactory.Services
             var csList = await GetSourcePathListAsync();
 
             // .csから、DI登録しているクラスを探す
-            // CommunityToolkitのみ対応。
+            // 現在の所CommunityToolkitのみ対応。
             foreach (var cs in csList)
             {
-                // コメントは除外
-                var text = RemoveComments(File.ReadAllText(cs));
-                if (text.Contains(Option.Value.DiLibrary.GetStringValue()))
+                var diClass = Roslyn.FindDiClass(cs);
+                if (diClass.Item1 != null)
                 {
-                    // 見つかったら覚えておく
+                    DiSourcePath = cs;
+                    DiClass = diClass.Item1;
+                    DiMethod = diClass.Item2;
                     return cs;
                 }
             }
+
+            #region 没
+            //// .csから、DI登録しているクラスを探す
+            //// CommunityToolkitのみ対応。
+            //foreach (var cs in csList)
+            //{
+            //    // コメントは除外
+            //    var text = RemoveComments(File.ReadAllText(cs));
+            //    if (text.Contains(Option.Value.DiLibrary.GetStringValue()))
+            //    {
+            //        // 見つかったら覚えておく
+            //        return cs;
+            //    }
+            //}
+            #endregion
 
             return null;
         }

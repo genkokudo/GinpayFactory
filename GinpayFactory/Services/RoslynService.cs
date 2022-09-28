@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using System.Windows.Shapes;
 
 namespace GinpayFactory.Services
@@ -14,8 +15,6 @@ namespace GinpayFactory.Services
     /// </summary>
     public interface IRoslynService
     {
-        // IOptionの登録は？
-
         /// <summary>
         /// .csソースからサービスか、インタフェースを探し
         /// そのサービス名を取得する。
@@ -31,6 +30,13 @@ namespace GinpayFactory.Services
         /// <param name="path"></param>
         /// <returns>見つかったクラス名全て</returns>
         public IEnumerable<string> GetAllClassNames(string path);
+
+        /// <summary>
+        /// ソース内でDI登録されているクラスとメソッドを探す。
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>クラス名, メソッド名</returns>
+        public (string, string) FindDiClass(string path);
     }
 
     public class RoslynService : IRoslynService
@@ -38,7 +44,7 @@ namespace GinpayFactory.Services
         // 解析用コンパイラで参照するdll
         // ぶっちゃけよく分かってない。おまじない。
         // 多分、コンパイルエラーが出たらtypeof(クラス名).Assembly.Locationみたいな感じでdll参照増やしていく感じだと思う。
-        static readonly PortableExecutableReference[] references = new[]{
+        private static readonly PortableExecutableReference[] references = new[]{
             // microlib.dll
             // intは内部的にはSystem.Int32を利用している。
             // メタリファレンスは何も指定しないとSystem.Int32等がインポートされていない。
@@ -50,7 +56,13 @@ namespace GinpayFactory.Services
             MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
         };
 
-        // 1ファイルごとに解析しているので、別ファイルに定義したものは拾えない事に注意
+        /// <summary>
+        /// DIを探すクラス
+        /// </summary>
+        private static DiWalker DiWalker { get; set; }
+
+        // 1ファイルごとに解析しているので
+        // そのファイル内で参照しているクラスの内、別ファイルに定義したもの等は拾えない事に注意
         /// <summary>
         /// ソース解析に必要なものをまとめたクラス
         /// </summary>
@@ -141,6 +153,21 @@ namespace GinpayFactory.Services
         public IEnumerable<string> GetAllClassNames(string path)
         {
             return GetClassNames(new CSharpAnalysis(path));
+        }
+
+        public (string, string) FindDiClass(string path)
+        {
+            // 無ければ作成
+            DiWalker ??= new DiWalker();
+
+            // 対象のソースコードを読み込む
+            var source = File.ReadAllText(path);
+
+            // シンタックス ツリーに変換してルートのノードを取得する
+            var syntaxTree = CSharpSyntaxTree.ParseText(source);
+            var rootNode = syntaxTree.GetRoot();
+
+            return DiWalker.FindDiClass(rootNode);
         }
     }
 }
