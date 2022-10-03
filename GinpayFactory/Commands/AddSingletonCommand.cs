@@ -9,7 +9,7 @@ namespace GinpayFactory
     /// 1度見つけたら記憶するため、VS再起動するまでそのクラス変更は受け付けない。
     /// 
     /// 表示中のソース内にServiceまたはIServiceがあれば、
-    /// その登録する場所に登録ソースを追加する。
+    /// その登録する場所にDI登録するソースを追加する。
     /// </summary>
     [Command(PackageIds.AddSingletonCommand)]
     internal sealed class AddSingletonCommand : BaseCommand<AddSingletonCommand>

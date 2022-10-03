@@ -8,9 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using System.Windows.Shapes;
-using static System.Net.Mime.MediaTypeNames;
 using Path = System.IO.Path;
 
 namespace GinpayFactory.Services

@@ -8,6 +8,9 @@ using System.Linq;
 
 namespace GinpayFactory
 {
+    // このソースは使ってないよ
+
+
     /// <summary>
     /// 現在のプロジェクト内から
     /// DIするサービスを登録するクラスを探す
