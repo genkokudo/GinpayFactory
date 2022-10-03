@@ -12,12 +12,6 @@ namespace GinpayFactory
 
     public class GinpayOption : BaseOptionModel<GinpayOption>
     {
-        [Category("DeepLの設定")]
-        [DisplayName("DeepL API Key")]
-        [Description("DeepLのAPIキーを設定する。")]
-        [DefaultValue("DeeplApiKey")]
-        public string ApiKey { get; set; } = "DeeplApiKey";
-
         [Category("DIの設定")]
         [DisplayName("DI Library")]
         [Description("使用するDIライブラリ")]

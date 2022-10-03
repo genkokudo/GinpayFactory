@@ -50,7 +50,6 @@
     <Compile Include="Commands\AddTransientCommand.cs" />
     <Compile Include="Commands\GenerateAssertCommand.cs" />
     <Compile Include="Commands\GenkokuCommand.cs" />
-    <Compile Include="Commands\SexyCommand.cs" />
     <Compile Include="Enums\DiLibrary.cs" />
     <Compile Include="Enums\DiSubmit.cs" />
     <Compile Include="Enums\StringValueAttribute.cs" />
@@ -61,7 +60,6 @@
     <Compile Include="Services\DiWalker.cs" />
     <Compile Include="Services\RoslynService.cs" />
     <Compile Include="Services\SourceService.cs" />
-    <Compile Include="Services\DeeplService.cs" />
     <Compile Include="source.extension.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

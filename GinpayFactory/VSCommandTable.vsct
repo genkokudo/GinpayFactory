@@ -59,16 +59,7 @@
 				</Strings>
 			</Button>
 
-			<!-- 今作ってるやつ
-      <Button guid="GinpayFactory" id="SexyCommand" priority="0x0200" type="Button">
-        <Parent guid="GinpayFactory" id="MyXamlMenuGroup" />
-        <Icon guid="ImageCatalogGuid" id="PasteAppend" />
-        <CommandFlag>IconIsMoniker</CommandFlag>
-        <Strings>
-          <ButtonText>選択範囲をDeepL翻訳</ButtonText>
-          <LocCanonicalName>.GinpayFactory.SexyCommand</LocCanonicalName>
-        </Strings>
-      </Button> -->
+			<!-- 今作ってるやつ -->
 			<Button guid="GinpayFactory" id="AddTransientCommand" priority="0x0400" type="Button">
 				<Parent guid="GinpayFactory" id="DiSubMenuGroup" />
 				<Icon guid="ImageCatalogGuid" id="PasteAppend" />
@@ -117,7 +108,6 @@
 			<IDSymbol name="MyXamlMenuGroup" value="0x0003" />
 			<IDSymbol name="MyXamarinMenuGroup" value="0x0004" />
 			<IDSymbol name="MyCommand" value="0x0100" />
-			<IDSymbol name="SexyCommand" value="0x0200" />
 			<IDSymbol name="GenkokuCommand" value="0x0300" />
 			<IDSymbol name="AddTransientCommand" value="0x0400" />
 			<IDSymbol name="AddSingletonCommand" value="0x0500" />

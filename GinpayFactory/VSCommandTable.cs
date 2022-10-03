@@ -22,7 +22,6 @@ namespace GinpayFactory
     {
         public const int MyMenuGroup = 0x0001;
         public const int MyCommand = 0x0100;
-        public const int SexyCommand = 0x0200;
         public const int GenkokuCommand = 0x0300;
         public const int AddTransientCommand = 0x0400;
         public const int AddSingletonCommand = 0x0500;
