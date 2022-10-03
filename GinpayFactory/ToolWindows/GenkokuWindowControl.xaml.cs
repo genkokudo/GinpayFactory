@@ -16,11 +16,9 @@ namespace GinpayFactory
 {
     public partial class GenkokuWindowControl : UserControl
     {
-        private IDeeplService Deepl { get; }
 
-        public GenkokuWindowControl(IDeeplService deepl)
+        public GenkokuWindowControl()
         {
-            Deepl = deepl;
             InitializeComponent();
         }
 
@@ -32,7 +30,7 @@ namespace GinpayFactory
             {
                 await Task.Run(async () =>
                 {
-                    var test = await Deepl.TranslateAsync("");
+                    //var test = await Deepl.TranslateAsync("");
                 });
             }
             catch (Exception ex)

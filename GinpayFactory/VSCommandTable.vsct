@@ -40,6 +40,7 @@
 		</Menus>
 
 		<Buttons>
+      <!--
 			<Button guid="GinpayFactory" id="MyCommand" priority="0x0100" type="Button">
 				<Parent guid="GinpayFactory" id="MyMenuGroup" />
 				<Icon guid="ImageCatalogGuid" id="StatusInformation" />
@@ -58,7 +59,7 @@
 					<LocCanonicalName>.GinpayFactory.GenkokuWindow</LocCanonicalName>
 				</Strings>
 			</Button>
-
+      -->
 			<!-- 今作ってるやつ -->
 			<Button guid="GinpayFactory" id="AddTransientCommand" priority="0x0400" type="Button">
 				<Parent guid="GinpayFactory" id="DiSubMenuGroup" />
