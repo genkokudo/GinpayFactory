@@ -66,7 +66,7 @@ namespace GinpayFactory.Services
                 {
                     DiPattern = DiLibrary.CommunityToolkit;
                     SyntaxNode parent = member.Parent;
-                    while (!(parent is MethodDeclarationSyntax) && !(parent is ConstructorDeclarationSyntax) || parent is null)
+                    while (parent is not MethodDeclarationSyntax && parent is not ConstructorDeclarationSyntax || parent is null)
                     {
                         parent = parent.Parent;
                     }
