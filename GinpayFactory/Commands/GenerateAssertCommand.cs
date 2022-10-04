@@ -20,13 +20,25 @@ namespace GinpayFactory
 
             // TODO:csが出来たとして、どうやって既存コードと置換するのか？
             // Delete,Insertはできるので、あとはDeleteする範囲を取得できればよい。それはRoslynで取れるはず。
-            
+
             //    // 成功したら、カーソルの所に挿入
             //    var docView = await VS.Documents.GetActiveDocumentViewAsync();
             //    var selection = docView.TextView.Selection;
             //    docView.TextBuffer.Delete(selection.SelectedSpans[0].Span);
             //    docView.TextBuffer.Insert(selection.Start.Position, result);
 
+
+            // TODO:正規表現で登録しているサービス一覧が取れないかな？
+            // ・Roslynで登録してる部分を取得（メソッド作っちゃえ）
+            // ・このtextに対してパターンマッチをかける。
+            // ・元の登録コードを再生成できるように、登録の種類・順序・サービス名を控える。
+
+            // TODO:Assemblyについて、なぜ指定したオブジェクトが生成できないのか？
+            // Assemblyクラスの取得系メソッドだと、この拡張プロジェクトのAssemblyが取れてしまう。
+            // 編集中のプロジェクトのAssemblyは取れない。
+            // コンパイルもしてない状態だから、動いてるプログラムのオブジェクトとは違う。
+            //
+            // クラスコードの状態から、持ってるフィールドや型を列挙してAssertを作成するようにすべき。これもRoslyn。
 
             #region 取り敢えず置いといて
             //// DI
