@@ -106,15 +106,8 @@ namespace GinpayFactory.Services
 
     public class SourceService : ISourceService
     {
-        /// <summary>
-        /// ソリューション内のDIを行っているソースのPathを1つだけ記憶する
-        /// コメントアウトしていても認識するので注意
-        /// </summary>
-        public string DiSourcePath { get; private set; }
-        /// <summary>DI登録を行っているクラス</summary>
-        public string DiClass { get; private set; }
-        /// <summary>DI登録を行っているメソッド</summary>
-        public string DiMethod { get; private set; }
+        /// <summary>DI登録を行っているメソッドとファイル名情報</summary>
+        public MethodData DiMethodData { get; private set; }
 
         private IOptions<DiOption> Option { get; set; }
         private IRoslynService Roslyn { get; set; }
@@ -150,15 +143,10 @@ namespace GinpayFactory.Services
 
         public async Task UpdateDiSourcePathAsync()
         {
-            if (!string.IsNullOrWhiteSpace(DiSourcePath))
-            {
-                return;
-            }
-
-            DiSourcePath = await SeekDiSourceAsync();
+            DiMethodData = await SeekDiSourceAsync();
         }
 
-        private async Task<string> SeekDiSourceAsync()
+        private async Task<MethodData> SeekDiSourceAsync()
         {
             // ソリューション内の.csファイルのフルパスを全て取得
             var csList = await GetSourcePathListAsync();
@@ -167,13 +155,10 @@ namespace GinpayFactory.Services
             // 現在の所CommunityToolkitのみ対応。
             foreach (var cs in csList)
             {
-                var diClass = Roslyn.FindDiClass(cs);
-                if (diClass.Item1 != null)
+                var diClass = Roslyn.FindDiMethod(cs);
+                if (diClass != null)
                 {
-                    DiSourcePath = cs;
-                    DiClass = diClass.Item1;
-                    DiMethod = diClass.Item2;
-                    return cs;
+                    return diClass;
                 }
             }
 
@@ -228,10 +213,10 @@ namespace GinpayFactory.Services
 
             // DIしている場所を探す（DIライブラリ別）
             // 実際にVSで開いたらいいのかな？
-            var view = await VS.Documents.OpenAsync(DiSourcePath);
+            var view = await VS.Documents.OpenAsync(DiMethodData.Path);
 
             // 何文字目からが登録処理か
-            var text = File.ReadAllText(DiSourcePath);
+            var text = File.ReadAllText(DiMethodData.Path);
             var keyword = Option.Value.DiLibrary.GetStringValue();
             var position = text.IndexOf(keyword);
 

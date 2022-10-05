@@ -1,6 +1,8 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using EnvDTE;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -33,10 +35,31 @@ namespace GinpayFactory.Services
 
         /// <summary>
         /// ソース内でDI登録されているクラスとメソッドを探す。
+        /// その部分のSpanとソースコードも取得する。
         /// </summary>
         /// <param name="path"></param>
-        /// <returns>クラス名, メソッド名</returns>
-        public (string, string) FindDiClass(string path);
+        /// <returns>無ければnull</returns>
+        public MethodData FindDiMethod(string path);
+    }
+
+    /// <summary>
+    /// Roslynで探し出したクラス内のメソッドについての情報
+    /// </summary>
+    public class MethodData
+    {
+        /// <summary>ソースのパス</summary>
+        public string Path { get; set; }
+        /// <summary>クラス名</summary>
+        public string ClassName { get; set; }
+        /// <summary>メソッド名</summary>
+        public string MethodName { get; set; }
+
+        /// <summary>記述範囲</summary>
+        public TextSpan Span { get; set; }
+        /// <summary>ソースコード</summary>
+        public string SourceCode { get; set; }
+        /// <summary>ソースコードのType</summary>
+        public Type Type { get; set; }
     }
 
     public class RoslynService : IRoslynService
@@ -155,19 +178,13 @@ namespace GinpayFactory.Services
             return GetClassNames(new CSharpAnalysis(path));
         }
 
-        public (string, string) FindDiClass(string path)
+        public MethodData FindDiMethod(string path)
         {
             // 無ければ作成
             DiWalker ??= new DiWalker();
 
-            // 対象のソースコードを読み込む
-            var source = File.ReadAllText(path);
-
-            // シンタックス ツリーに変換してルートのノードを取得する
-            var syntaxTree = CSharpSyntaxTree.ParseText(source);
-            var rootNode = syntaxTree.GetRoot();
-
-            return DiWalker.FindDiClass(rootNode);
+            var classmethod = DiWalker.FindDiClass(path);
+            return classmethod;
         }
     }
 }

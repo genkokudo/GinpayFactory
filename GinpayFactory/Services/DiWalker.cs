@@ -7,6 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GinpayFactory.Enums;
+using Microsoft.CodeAnalysis.CSharp;
+using System.IO;
+using Microsoft.CodeAnalysis.Text;
+using Newtonsoft.Json.Linq;
 
 namespace GinpayFactory.Services
 {
@@ -23,18 +27,34 @@ namespace GinpayFactory.Services
         /// <summary>
         /// DIを行っているクラス名
         /// </summary>
-        public string DiClassName { get; set; } = null;
+        public string DiClassName { get; set; }
 
         /// <summary>
         /// DIを行っているメソッド名
         /// コンストラクタで行っている場合はクラス名と同じになる
         /// </summary>
-        public string DiMethodName { get; set; } = null;
+        public string DiMethodName { get; set; }
+
+        /// <summary>
+        /// DI登録している所のソースコード
+        /// </summary>
+        public string DiSourceCode { get; set; }
+
+        /// <summary>
+        /// DI登録している所の記述範囲
+        /// </summary>
+        public TextSpan DiSourceSpan { get; set; }
 
         /// <summary>
         /// DI登録の形式
         /// </summary>
         public DiLibrary DiPattern { get; set; } = DiLibrary.HostedCommunityToolkit;
+
+        /// <summary>
+        /// DI登録している所のソースコードのType
+        /// 要らないかも。
+        /// </summary>
+        public Type DiSourceType { get; set; }
 
         /// <summary>
         /// 各ノードを辿り、上に書かれた条件の要素を探してメソッド名とクラス名を記憶する
@@ -50,13 +70,13 @@ namespace GinpayFactory.Services
             {
                 // コンストラクタの場合
                 var constructor = node as ConstructorDeclarationSyntax;
-                FindServiceCollectionParameter(constructor.ParameterList.Parameters, constructor.Parent as ClassDeclarationSyntax, constructor.Identifier.Text);
+                FindServiceCollectionParameter(constructor.ParameterList.Parameters, constructor.Parent as ClassDeclarationSyntax, constructor.Identifier.Text, constructor.Body.ToFullString(), constructor.FullSpan, node.GetType());
             }
             else if (node.GetType().Name == nameof(MethodDeclarationSyntax))
             {
                 // メソッド定義の場合
                 var method = node as MethodDeclarationSyntax;
-                FindServiceCollectionParameter(method.ParameterList.Parameters, method.Parent as ClassDeclarationSyntax, method.Identifier.Text);
+                FindServiceCollectionParameter(method.ParameterList.Parameters, method.Parent as ClassDeclarationSyntax, method.Identifier.Text, method.Body.ToFullString(), method.FullSpan, node.GetType());
             }
             else if (node.GetType().Name == nameof(MemberAccessExpressionSyntax))
             {
@@ -79,6 +99,9 @@ namespace GinpayFactory.Services
                         // コンストラクタの場合
                         var con = parent as ConstructorDeclarationSyntax;
                         DiMethodName = DiClassName = con.Identifier.Text;
+                        DiSourceCode = con.Body.ToFullString();
+                        DiSourceSpan = con.FullSpan;
+                        DiSourceType = con.GetType();
                     }
                     else if (parent.GetType().Name == nameof(MethodDeclarationSyntax))
                     {
@@ -87,6 +110,9 @@ namespace GinpayFactory.Services
                         var cls = mtd.Parent as ClassDeclarationSyntax;
                         DiClassName = cls.Identifier.Text;
                         DiMethodName = mtd.Identifier.Text;
+                        DiSourceCode = mtd.Body.ToFullString();
+                        DiSourceSpan = mtd.FullSpan;
+                        DiSourceType = mtd.GetType();
                     }
                 }
             }
@@ -101,7 +127,7 @@ namespace GinpayFactory.Services
         /// <param name="Parameters"></param>
         /// <param name="classSyntax"></param>
         /// <param name="IdentifierText"></param>
-        private void FindServiceCollectionParameter(SeparatedSyntaxList<ParameterSyntax> Parameters, ClassDeclarationSyntax classSyntax, string IdentifierText)
+        private void FindServiceCollectionParameter(SeparatedSyntaxList<ParameterSyntax> Parameters, ClassDeclarationSyntax classSyntax, string IdentifierText, string source, TextSpan span, Type type)
         {
             foreach (var parameter in Parameters)
             {
@@ -113,6 +139,9 @@ namespace GinpayFactory.Services
                 {
                     DiClassName = classSyntax.Identifier.Text;
                     DiMethodName = IdentifierText;
+                    DiSourceCode = source;
+                    DiSourceSpan = span;
+                    DiSourceType = type;
                 }
             }
         }
@@ -121,12 +150,31 @@ namespace GinpayFactory.Services
         /// DIを行なっているクラスとメソッドを見つける
         /// なかったらnullを返す
         /// </summary>
-        /// <param name="node"></param>
+        /// <param name="path">csファイルのパス</param>
         /// <returns>クラス名, メソッド名</returns>
-        public (string, string) FindDiClass(SyntaxNode node)
+        public MethodData FindDiClass(string path)
         {
-            Visit(node);
-            return (DiClassName, DiMethodName);
+            DiClassName = null;
+            DiMethodName = null;
+
+            // 対象のソースコードを読み込む
+            var source = File.ReadAllText(path);
+
+            // シンタックス ツリーに変換してルートのノードを取得する
+            var syntaxTree = CSharpSyntaxTree.ParseText(source);
+            var rootNode = syntaxTree.GetRoot();
+
+            Visit(rootNode);
+
+            return DiClassName == null ? null : new MethodData
+            {
+                Path = path,
+                ClassName = DiClassName,
+                MethodName = DiMethodName,
+                Span = DiSourceSpan,
+                SourceCode = DiSourceCode,
+                Type = DiSourceType
+            };
         }
     }
 }
