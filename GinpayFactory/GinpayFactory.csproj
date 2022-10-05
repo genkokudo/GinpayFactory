@@ -58,7 +58,6 @@
     <Compile Include="Commands\MyCommand.cs" />
     <Compile Include="GinpayFactoryPackage.cs" />
     <Compile Include="Services\DiWalker.cs" />
-    <Compile Include="Services\IAssertService.cs" />
     <Compile Include="Services\RoslynService.cs" />
     <Compile Include="Services\SourceService.cs" />
     <Compile Include="source.extension.cs">

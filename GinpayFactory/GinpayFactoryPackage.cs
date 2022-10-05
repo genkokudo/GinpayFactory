@@ -41,7 +41,6 @@ namespace GinpayFactory
             Ioc.Default.ConfigureServices(new ServiceCollection()
                     .AddSingleton<ISourceService, SourceService>()
                     .AddTransient<IRoslynService, RoslynService>()
-                    .AddTransient<IAssertService, AssertService>()
                     .AddTransient<GenkokuWindowControl>()
                     .AddSingleton(diOption)
                     .BuildServiceProvider()
