@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Shapes;
 using Path = System.IO.Path;
 
 namespace GinpayFactory.Services
@@ -72,6 +73,12 @@ namespace GinpayFactory.Services
         /// <returns></returns>
         public string GetLineText(string text, string keyword);
 
+        /// <summary>
+        /// DI登録のソースが未取得の場合、検索して取得する
+        /// 既にある場合、そのcsから再取得する
+        /// </summary>
+        /// <returns></returns>
+        public Task<MethodData> SeekOrGetDiSourceAsync();
 
         // ---------- ここから下はVS拡張依存 ----------
         /// <summary>
@@ -143,23 +150,39 @@ namespace GinpayFactory.Services
 
         public async Task UpdateDiSourcePathAsync()
         {
-            DiMethodData = await SeekDiSourceAsync();
+            // 1度ソースを見つけている場合は、検索は行わずソースコード再取得のみ
+            DiMethodData = DiMethodData == null ? await SeekDiSourceAllAsync() : GetDiSource(DiMethodData.Path);
         }
 
-        private async Task<MethodData> SeekDiSourceAsync()
+        public async Task<MethodData> SeekOrGetDiSourceAsync()
+        {
+            await UpdateDiSourcePathAsync();
+            return DiMethodData;
+        }
+
+        // 対象csからDI登録のソースを取得する
+        private MethodData GetDiSource(string csPath)
+        {
+            // .csから、DI登録しているクラスを探す
+            // 現在の所CommunityToolkitのみ対応。
+            var diClass = Roslyn.FindDiMethod(csPath);
+            if (diClass != null)
+            {
+                return diClass;
+            }
+            return null;
+        }
+
+        // 全てのcsからDI登録のソースを探して取得する
+        private async Task<MethodData> SeekDiSourceAllAsync()
         {
             // ソリューション内の.csファイルのフルパスを全て取得
             var csList = await GetSourcePathListAsync();
 
-            // .csから、DI登録しているクラスを探す
-            // 現在の所CommunityToolkitのみ対応。
+            // 全ての.csから、DI登録しているクラスを探す
             foreach (var cs in csList)
             {
-                var diClass = Roslyn.FindDiMethod(cs);
-                if (diClass != null)
-                {
-                    return diClass;
-                }
+                GetDiSource(cs);
             }
 
             #region 没
