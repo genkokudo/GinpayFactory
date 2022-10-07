@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using GinpayFactory.Services;
 using Microsoft.VisualStudio.Shell.Interop;
+using System.Linq;
 using System.Reflection;
 
 namespace GinpayFactory
@@ -21,7 +22,8 @@ namespace GinpayFactory
 
             // DI
             var source = Ioc.Default.GetService<ISourceService>();
-            // ・Roslynで登録してる部分を取得
+
+            // Roslynで登録してる部分を取得
             var diSource = await source.SeekOrGetDiSourceAsync();
             if (diSource == null)
             {
@@ -31,13 +33,19 @@ namespace GinpayFactory
                     OLEMSGICON.OLEMSGICON_INFO, 
                     OLEMSGBUTTON.OLEMSGBUTTON_OK
                 );
+                return;
             }
-            // ・このtextに対してパターンマッチをかけ、登録されているサービス一覧を作成するメソッドを作る。（他のクラスにDIする時にも使う。）
+            // このtextに対してパターンマッチをかけ、登録されているサービス一覧を作成するメソッドを作る。（他のクラスにDIする時にも使う。）
+            var serviceNameList = source.GetServiceNameList(diSource.SourceCode);
 
-            // 登録ソース生成はメソッド、型引数、引数、呼び出し順序を控えればいける？無茶？
-            // やっぱ無茶感が強いので、挿入だけにしておくか…。想定していないメソッドが入るだけで復元できなくなっちゃう。
+            await VS.MessageBox.ShowAsync(
+                "見つかったServiceのリスト",
+                string.Join("\r\n", serviceNameList),
+                OLEMSGICON.OLEMSGICON_INFO,
+                OLEMSGBUTTON.OLEMSGBUTTON_OK
+            ); ;
+
             // 上記のサービス一覧にあるものを登録しようとすると警告を出して処理中断。
-            // ・元の登録コードを再生成できるように、登録の種類・順序・サービス名を控える。
 
 
 
@@ -52,8 +60,6 @@ namespace GinpayFactory
             //    docView.TextBuffer.Delete(selection.SelectedSpans[0].Span);
             //    docView.TextBuffer.Insert(selection.Start.Position, result);
 
-
-            // TODO:正規表現で登録しているサービス一覧が取れないかな？
 
         }
     }

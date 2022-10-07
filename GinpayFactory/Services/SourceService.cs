@@ -109,6 +109,14 @@ namespace GinpayFactory.Services
         /// <param name="diSubmit">DI登録の種類</param>
         /// <returns></returns>
         public Task AddServiceAsync(DiSubmit diSubmit);
+
+        /// <summary>
+        /// ソースコードに対し
+        /// 正規表現によってDIされているサービスの一覧を検出し、その一覧を取得する。
+        /// </summary>
+        /// <param name="source">ソースコード</param>
+        /// <returns>サービスの一覧</returns>
+        public IEnumerable<string> GetServiceNameList(string source);
     }
 
     public class SourceService : ISourceService
@@ -340,6 +348,45 @@ namespace GinpayFactory.Services
                 }
                 await SeekAndInsertDiAsync(diSubmit, name);
             }
+        }
+
+        public IEnumerable<string> GetServiceNameList(string source)
+        {
+            var list = new List<string>();
+
+            // "<"と">"に囲まれている文字列を検索
+            var terms = "<(.+)>";
+            // 条件に合った文字列を全部拾う
+            var r = new Regex(terms, RegexOptions.Multiline);
+            var mc = r.Matches(source);
+
+            foreach (var item in mc)
+            {
+                var services = item.ToString().Trim('<').Trim('>').Replace(" ", string.Empty).Split(',');
+                list.AddRange(services);
+            }
+
+            // 重複は除外する
+            // 末尾が"Service"ではないものは除外する
+            var result = list.Distinct();
+            result = result.Where(x => x.EndsWith("Service"));
+
+            // 先頭から"I"除いた文字列が他と重複した場合、それはインタフェースとして除外する
+            var removeList = new List<string>();
+            foreach (var item in result)
+            {
+                if (item.StartsWith("I"))
+                {
+                    var serviceName = item.Substring(1);
+                    if (result.Contains(serviceName))
+                    {
+                        removeList.Add(item);
+                    }
+                }
+            }
+            result = result.Where(x => !removeList.Contains(x));
+
+            return result;
         }
     }
 }
