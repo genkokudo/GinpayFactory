@@ -43,13 +43,6 @@ namespace GinpayFactory.Services
         public Task<List<string>> GetSourcePathListAsync(bool excludeObj = true);
 
         /// <summary>
-        /// 現在のソリューション内から、
-        /// DI登録処理を行っているクラスを探して記憶する
-        /// </summary>
-        /// <returns></returns>
-        public Task UpdateDiSourcePathAsync();
-
-        /// <summary>
         /// ソースコードからコメントを除外する。
         /// </summary>
         /// <param name="text">ソースコード</param>
@@ -95,7 +88,7 @@ namespace GinpayFactory.Services
 
         /// <summary>
         /// 記憶しているDI登録処理を行っているクラスから、
-        /// DI登録処理を行っている箇所を探して、登録する
+        /// DI登録処理を行っている箇所を探して、指定したサービスを登録する
         /// </summary>
         /// <param name="di">DI登録の種類</param>
         /// <param name="serviceName">サービス名</param>
@@ -104,14 +97,14 @@ namespace GinpayFactory.Services
 
         /// <summary>
         /// ソリューション内から設定されているフレームワークでDI登録を行っている箇所を探す。
-        /// 現在のソースからServiceクラスまたはIServiceインタフェースを探し、上記の場所に登録する。
+        /// 現在表示中のソースからServiceクラスまたはIServiceインタフェースを探し、上記の場所に登録する。
         /// </summary>
         /// <param name="diSubmit">DI登録の種類</param>
         /// <returns></returns>
         public Task AddServiceAsync(DiSubmit diSubmit);
 
         /// <summary>
-        /// ソースコードに対し
+        /// 現在表示中のソースコードに対し
         /// 正規表現によってDIされているサービスの一覧を検出し、その一覧を取得する。
         /// </summary>
         /// <param name="source">ソースコード</param>
@@ -156,15 +149,10 @@ namespace GinpayFactory.Services
             return result;
         }
 
-        public async Task UpdateDiSourcePathAsync()
+        public async Task<MethodData> SeekOrGetDiSourceAsync()
         {
             // 1度ソースを見つけている場合は、検索は行わずソースコード再取得のみ
             DiMethodData = DiMethodData == null ? await SeekDiSourceAllAsync() : GetDiSource(DiMethodData.Path);
-        }
-
-        public async Task<MethodData> SeekOrGetDiSourceAsync()
-        {
-            await UpdateDiSourcePathAsync();
             return DiMethodData;
         }
 
@@ -190,7 +178,11 @@ namespace GinpayFactory.Services
             // 全ての.csから、DI登録しているクラスを探す
             foreach (var cs in csList)
             {
-                GetDiSource(cs);
+                var di = GetDiSource(cs);
+                if (di != null)
+                {
+                    return di;
+                }
             }
 
             #region 没
@@ -240,14 +232,14 @@ namespace GinpayFactory.Services
         
         public async Task SeekAndInsertDiAsync(DiSubmit di, string serviceName)
         {
-            await UpdateDiSourcePathAsync();
+            var diData = await SeekOrGetDiSourceAsync();
 
             // DIしている場所を探す（DIライブラリ別）
-            // 実際にVSで開いたらいいのかな？
-            var view = await VS.Documents.OpenAsync(DiMethodData.Path);
+            // 実際にVSでその場所を表示する
+            var view = await VS.Documents.OpenAsync(diData.Path);
 
             // 何文字目からが登録処理か
-            var text = File.ReadAllText(DiMethodData.Path);
+            var text = File.ReadAllText(diData.Path);
             var keyword = Option.Value.DiLibrary.GetStringValue();
             var position = text.IndexOf(keyword);
 
@@ -289,17 +281,8 @@ namespace GinpayFactory.Services
             return null;
         }
 
-        /// <summary>
-        /// ソリューション内から設定されているフレームワークでDI登録を行っている箇所を探す。
-        /// 現在のソースからServiceクラスまたはIServiceインタフェースを探し、上記の場所に登録する。
-        /// </summary>
-        /// <param name="diSubmit">DI登録の種類</param>
-        /// <returns></returns>
         public async Task AddServiceAsync(DiSubmit diSubmit)
         {
-            // ソリューション内の.csから、DI登録しているクラスを探す
-            await UpdateDiSourcePathAsync();
-
             // 現在のソースが.csであることを確認する
             if (!await CheckCurrentSourceIsCSharpAsync())
             {

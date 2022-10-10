@@ -2,14 +2,12 @@
     x:Class="GinpayFactory.GenkokuWindowControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:catalog="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.ImageCatalog"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:imaging="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.Imaging"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:theming="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Imaging"
     xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
-    xmlns:util="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Utilities"
+    xmlns:vm="clr-namespace:GinpayFactory.ViewModels;assembly=GinpayFactory"
     Name="MyToolWindow"
+    d:DataContext="{d:DesignInstance vm:GenkokuWindowControlViewModel}"
     d:DesignHeight="300"
     d:DesignWidth="300"
     toolkit:Themes.UseVsTheme="True"
@@ -19,14 +17,14 @@
             <Label
                 x:Name="lblHeadline"
                 Margin="10"
-                HorizontalAlignment="Center">
-                Title
-            </Label>
+                HorizontalAlignment="Center"
+                Content="{Binding Name}" />
             <Button
                 Name="button1"
                 Width="120"
                 Height="80"
-                Click="Button1_Click"
+                Command="{Binding GreetCommand}"
+                CommandParameter="aaaa"
                 Content="Click me!" />
         </StackPanel>
     </Grid>

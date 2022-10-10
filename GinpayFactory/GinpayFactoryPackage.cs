@@ -4,6 +4,7 @@ global using System;
 global using Task = System.Threading.Tasks.Task;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using GinpayFactory.Services;
+using GinpayFactory.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Runtime.InteropServices;
@@ -41,7 +42,8 @@ namespace GinpayFactory
             Ioc.Default.ConfigureServices(new ServiceCollection()
                     .AddSingleton<ISourceService, SourceService>()
                     .AddTransient<IRoslynService, RoslynService>()
-                    .AddTransient<GenkokuWindowControl>()
+                    .AddTransient<GenkokuWindowControlViewModel>()
+                    //.AddTransient<GenkokuWindowControl>()       // やらなくて良い
                     .AddSingleton(diOption)
                     .BuildServiceProvider()
             );

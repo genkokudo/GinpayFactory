@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using GinpayFactory.Services;
+using GinpayFactory.ViewModels;
 using Microsoft.VisualStudio.Imaging;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -19,8 +20,7 @@ namespace GinpayFactory
 
         public override Task<FrameworkElement> CreateAsync(int toolWindowId, CancellationToken cancellationToken)
         {
-            return Task.FromResult<FrameworkElement>(Ioc.Default.GetService<GenkokuWindowControl>());
-            //return Task.FromResult<FrameworkElement>(new GenkokuWindowControl());
+            return Task.FromResult<FrameworkElement>(new GenkokuWindowControl(Ioc.Default.GetService<GenkokuWindowControlViewModel>()));
         }
 
         // ユニークなGUIDを付けること

@@ -43,9 +43,9 @@ namespace GinpayFactory
                 string.Join("\r\n", serviceNameList),
                 OLEMSGICON.OLEMSGICON_INFO,
                 OLEMSGBUTTON.OLEMSGBUTTON_OK
-            ); ;
+            );
 
-            // 上記のサービス一覧にあるものを登録しようとすると警告を出して処理中断。
+            await GenkokuWindow.ShowAsync();
 
 
 

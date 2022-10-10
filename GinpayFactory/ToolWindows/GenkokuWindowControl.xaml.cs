@@ -1,44 +1,16 @@
-﻿using GinpayFactory.Services;
-using Microsoft.VisualStudio.OLE.Interop;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using GinpayFactory.ViewModels;
 using System.Windows.Controls;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace GinpayFactory
 {
     public partial class GenkokuWindowControl : UserControl
     {
 
-        public GenkokuWindowControl()
+        public GenkokuWindowControl(GenkokuWindowControlViewModel context)
         {
             InitializeComponent();
-        }
-
-#pragma warning disable VSTHRD100 // Avoid async void methods
-        private async void Button1_Click(object sender, RoutedEventArgs e)
-#pragma warning restore VSTHRD100 // Avoid async void methods
-        {
-            try
-            {
-                await Task.Run(async () =>
-                {
-                    //var test = await Deepl.TranslateAsync("");
-                });
-            }
-            catch (Exception ex)
-            {
-                await ex.LogAsync();
-            }
+            DataContext = context;
         }
         
-
     }
 }
