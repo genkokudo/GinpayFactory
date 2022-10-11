@@ -223,7 +223,8 @@ namespace GinpayFactory.Services
                 result.Add(new MethodData
                 {
                     ClassName = name,
-                    Span = syntax.Span
+                    Span = syntax.Span,
+                    SourceCode = syntax.ToString()
                 });
             }
             return result;

@@ -1,9 +1,11 @@
 ﻿using Community.VisualStudio.Toolkit;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using GinpayFactory.Enums;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.Package;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -400,12 +402,33 @@ namespace GinpayFactory.Services
         {
             // 表示中のソースからクラスとSpanを取得
             var classes = Roslyn.GetAllClasses(await GetActiveDocumentFilePathAsync());
+            
             // 現在のカーソル位置のクラスがどれかを判別して、そのクラスのソースコードを取得する
             var docView = await VS.Documents.GetActiveDocumentViewAsync();
-            var position = docView.TextView.Caret.Position.BufferPosition;      // TODO:これ、右クリックした時点の値とファイルじゃないと意味ないのでは？↑も。
+            var position = docView.TextView.Caret.Position.BufferPosition;
+            var targetClass = classes.First(x => x.Span.Contains(position.Position));
+
 
             // サービス名をインタフェースとしてDIしたソースを取得し、差し替える。
             //Roslyn.AddInjection(string source, IEnumerable<string> serviceNames);
+            DeleteAndInsertSource(docView, targetClass.Span, "aaaa");
+
+            Console.WriteLine();
+        }
+
+        /// <summary>
+        /// 指定した範囲のテキストを削除して、そこに新しいテキストを挿入する。
+        /// </summary>
+        /// <param name="docView">現在のテキスト</param>
+        /// <param name="oldTextSpan">削除する範囲</param>
+        /// <param name="newText">挿入するテキスト</param>
+        /// <returns></returns>
+        private DocumentView DeleteAndInsertSource(DocumentView docView, TextSpan oldTextSpan, string newText)
+        {
+            // 成功したら、カーソルの所に挿入
+            docView.TextBuffer.Delete(new Span(oldTextSpan.Start, oldTextSpan.Length));
+            docView.TextBuffer.Insert(oldTextSpan.Start, newText);
+            return docView;
         }
     }
 }

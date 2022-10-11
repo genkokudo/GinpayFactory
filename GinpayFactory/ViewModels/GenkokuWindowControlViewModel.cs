@@ -53,8 +53,7 @@ namespace GinpayFactory.ViewModels
             await _source.AddAndReplaceInjectionAsync(serviceNames);
             // TODO:現在表示中のクラスに選択したServiceをインジェクションする。
             // TODO:表示中のソースのクラスからソースを取るんだけど、どのクラス？
-            // →カーソルの位置を含むSpanのクラスってことで。
-            // →右クリックした時点のクラスじゃないと意味ないよ
+            // →ボタン押した時点のカーソルの位置を含むSpanのクラスってことで。
         }
     }
 
