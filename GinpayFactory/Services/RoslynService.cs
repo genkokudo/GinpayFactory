@@ -40,6 +40,22 @@ namespace GinpayFactory.Services
         /// <param name="path"></param>
         /// <returns>無ければnull</returns>
         public MethodData FindDiMethod(string path);
+
+        /// <summary>
+        /// ソース内のクラスとそのSpanを全て取得する
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>見つかったクラス名とSpan、それ以外のフィールドはnull</returns>
+        public IEnumerable<MethodData> GetAllClasses(string path);
+
+        // TODO:実装すること
+        /// <summary>
+        /// クラスのソースコードに指定したサービスをDIしたソースコードを生成する。
+        /// サービス名の頭に"I"を追加したインタフェースとしてDIされる。
+        /// </summary>
+        /// <param name="serviceNames">DIするサービス名</param>
+        /// <returns>DI後のソースコード</returns>
+        public string AddInjection(string source, IEnumerable<string> serviceNames);
     }
 
     /// <summary>
@@ -185,6 +201,32 @@ namespace GinpayFactory.Services
 
             var classmethod = DiWalker.FindDiClass(path);
             return classmethod;
+        }
+
+        public string AddInjection(string source, IEnumerable<string> serviceNames)
+        {
+            // クラスのソースコードに指定したサービスをDIしたソースコードを生成する。
+            // サービス名の頭に"I"を追加したインタフェースとしてDIされる。
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<MethodData> GetAllClasses(string path)
+        {
+            var result = new List<MethodData>();
+            var analysis = new CSharpAnalysis(path);
+
+            // ノード群からクラスに関する構文情報群を取得
+            var classSyntaxArray = analysis.Nodes.OfType<ClassDeclarationSyntax>();
+            foreach (var syntax in classSyntaxArray)
+            {
+                var name = analysis.SemanticModel.GetDeclaredSymbol(syntax).Name;
+                result.Add(new MethodData
+                {
+                    ClassName = name,
+                    Span = syntax.Span
+                });
+            }
+            return result;
         }
     }
 }

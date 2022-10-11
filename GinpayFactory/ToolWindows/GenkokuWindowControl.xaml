@@ -20,12 +20,27 @@
                 HorizontalAlignment="Center"
                 Content="{Binding Name}" />
             <Button
-                Name="button1"
                 Width="120"
-                Height="80"
+                Height="40"
                 Command="{Binding GreetCommand}"
                 CommandParameter="aaaa"
-                Content="Click me!" />
+                Content=" Get Services List" />
+
+            <ListView Margin="0,5,0,0" ItemsSource="{Binding Services}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox IsChecked="{Binding IsChecked}" />
+                            <TextBlock Text="{Binding ServiceName}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Button
+                Width="120"
+                Height="40"
+                Command="{Binding SubmitCommand}"
+                Content="OK" />
         </StackPanel>
     </Grid>
 </UserControl>

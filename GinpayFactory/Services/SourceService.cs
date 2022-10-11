@@ -2,7 +2,9 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using GinpayFactory.Enums;
 using Microsoft.Extensions.Options;
+using Microsoft.VisualStudio.Package;
 using Microsoft.VisualStudio.Shell.Interop;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -104,12 +106,24 @@ namespace GinpayFactory.Services
         public Task AddServiceAsync(DiSubmit diSubmit);
 
         /// <summary>
-        /// 現在表示中のソースコードに対し
+        /// 現在のソリューションでDIされているサービスの一覧を検出し、その一覧を取得する。
+        /// </summary>
+        /// <returns></returns>
+        public Task<IEnumerable<string>> GetServiceNameListAsync();
+
+        /// <summary>
+        /// 引数のソースコードに対し
         /// 正規表現によってDIされているサービスの一覧を検出し、その一覧を取得する。
         /// </summary>
         /// <param name="source">ソースコード</param>
         /// <returns>サービスの一覧</returns>
         public IEnumerable<string> GetServiceNameList(string source);
+
+        // TODO:じっそうすること
+        // 現在のカーソル位置のクラスがどれかを判別して、そのクラスのソースコードを取得する
+        // Roslynからクラス一覧とそのSpanを取る
+        // サービス名をインタフェースとしてDIしたソースを取得し、差し替える。
+        public Task AddAndReplaceInjectionAsync(IEnumerable<string> serviceNames);
     }
 
     public class SourceService : ISourceService
@@ -232,9 +246,9 @@ namespace GinpayFactory.Services
         
         public async Task SeekAndInsertDiAsync(DiSubmit di, string serviceName)
         {
+            // DIしている場所を探す（DIライブラリ別）
             var diData = await SeekOrGetDiSourceAsync();
 
-            // DIしている場所を探す（DIライブラリ別）
             // 実際にVSでその場所を表示する
             var view = await VS.Documents.OpenAsync(diData.Path);
 
@@ -370,6 +384,28 @@ namespace GinpayFactory.Services
             result = result.Where(x => !removeList.Contains(x));
 
             return result;
+        }
+
+        public async Task<IEnumerable<string>> GetServiceNameListAsync()
+        {
+            var source = await SeekOrGetDiSourceAsync();
+            if (source == null)
+            {
+                return null;
+            }
+            return GetServiceNameList(source.SourceCode);
+        }
+
+        public async Task AddAndReplaceInjectionAsync(IEnumerable<string> serviceNames)
+        {
+            // 表示中のソースからクラスとSpanを取得
+            var classes = Roslyn.GetAllClasses(await GetActiveDocumentFilePathAsync());
+            // 現在のカーソル位置のクラスがどれかを判別して、そのクラスのソースコードを取得する
+            var docView = await VS.Documents.GetActiveDocumentViewAsync();
+            var position = docView.TextView.Caret.Position.BufferPosition;      // TODO:これ、右クリックした時点の値とファイルじゃないと意味ないのでは？↑も。
+
+            // サービス名をインタフェースとしてDIしたソースを取得し、差し替える。
+            //Roslyn.AddInjection(string source, IEnumerable<string> serviceNames);
         }
     }
 }
