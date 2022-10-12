@@ -38,7 +38,7 @@ namespace GinpayFactory.ViewModels
         [RelayCommand]
         private async Task GreetAsync(string user)
         {
-            var serviceNames = await _source.GetServiceNameListAsync();
+            var serviceNames = await _source.SeekAndGetServiceNameListAsync();
             Services = serviceNames.Select(x => new ServiceInput { ServiceName = x }).ToList();
         }
 
@@ -49,11 +49,11 @@ namespace GinpayFactory.ViewModels
         [RelayCommand]
         private async Task SubmitAsync()
         {
+            // 現在表示中のクラスに選択したServiceをインジェクションする。
             var serviceNames = services.Where(x => x.IsChecked).Select(x => x.ServiceName).ToList();
+            // TODO:ボタン押した時点のカーソルの位置を含むSpanのクラスからソースを取る
             await _source.AddAndReplaceInjectionAsync(serviceNames);
-            // TODO:現在表示中のクラスに選択したServiceをインジェクションする。
-            // TODO:表示中のソースのクラスからソースを取るんだけど、どのクラス？
-            // →ボタン押した時点のカーソルの位置を含むSpanのクラスってことで。
+
         }
     }
 

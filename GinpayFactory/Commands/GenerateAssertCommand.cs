@@ -45,13 +45,6 @@ namespace GinpayFactory
                 OLEMSGBUTTON.OLEMSGBUTTON_OK
             );
 
-            // 現在のカーソル位置のクラスがどれかを判別して、そのクラスのソースコード（というかノード）を取得。
-            // TODO:右クリックした時点のファイル（というかノード）とカーソル位置は控えておくこと。クラス取得時とソース差し替え時に使う。どこに控える？
-            // →控えるのはノードだけで良くない？
-            var docView = await VS.Documents.GetActiveDocumentViewAsync();
-            var position = docView.TextView.Caret.Position.BufferPosition;
-
-            //await source.AddAndReplaceInjectionAsync(serviceNameList);
 
             await GenkokuWindow.ShowAsync();
 

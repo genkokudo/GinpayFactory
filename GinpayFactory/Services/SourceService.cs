@@ -108,14 +108,16 @@ namespace GinpayFactory.Services
         public Task AddServiceAsync(DiSubmit diSubmit);
 
         /// <summary>
-        /// 現在のソリューションでDIされているサービスの一覧を検出し、その一覧を取得する。
+        /// 現在のソリューションでDI登録されている箇所のソースを探して
+        /// そこで登録しているサービスを検出し、その一覧を取得する。
         /// </summary>
         /// <returns></returns>
-        public Task<IEnumerable<string>> GetServiceNameListAsync();
+        public Task<IEnumerable<string>> SeekAndGetServiceNameListAsync();
 
         /// <summary>
         /// 引数のソースコードに対し
-        /// 正規表現によってDIされているサービスの一覧を検出し、その一覧を取得する。
+        /// 正規表現によってDI登録されているサービスの一覧を検出し、その一覧を取得する。
+        /// あらかじめそのソースでDI登録を行っていることが分かっている前提。
         /// </summary>
         /// <param name="source">ソースコード</param>
         /// <returns>サービスの一覧</returns>
@@ -388,7 +390,7 @@ namespace GinpayFactory.Services
             return result;
         }
 
-        public async Task<IEnumerable<string>> GetServiceNameListAsync()
+        public async Task<IEnumerable<string>> SeekAndGetServiceNameListAsync()
         {
             var source = await SeekOrGetDiSourceAsync();
             if (source == null)
@@ -400,18 +402,19 @@ namespace GinpayFactory.Services
 
         public async Task AddAndReplaceInjectionAsync(IEnumerable<string> serviceNames)
         {
-            // 表示中のソースからクラスとSpanを取得
+            // 表示中のソースからクラスとSpanとソースを取得
             var classes = Roslyn.GetAllClasses(await GetActiveDocumentFilePathAsync());
             
             // 現在のカーソル位置のクラスがどれかを判別して、そのクラスのソースコードを取得する
             var docView = await VS.Documents.GetActiveDocumentViewAsync();
             var position = docView.TextView.Caret.Position.BufferPosition;
-            var targetClass = classes.First(x => x.Span.Contains(position.Position));
+            var targetClass = classes.FirstOrDefault(x => x.Span.Contains(position.Position));
 
+            // サービス名をインタフェースとしてDIしたソースに書き換える。
+            Roslyn.AddInjection(targetClass.SourceCode, serviceNames);
 
-            // サービス名をインタフェースとしてDIしたソースを取得し、差し替える。
-            //Roslyn.AddInjection(string source, IEnumerable<string> serviceNames);
-            DeleteAndInsertSource(docView, targetClass.Span, "aaaa");
+            // クラスのSpanに対して、新しいソースに差し替える
+            DeleteAndInsertSource(docView, targetClass.Span, $"{string.Join(",\n", serviceNames)}差し替えたよ！");
 
             Console.WriteLine();
         }
