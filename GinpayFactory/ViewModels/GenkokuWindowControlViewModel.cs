@@ -18,14 +18,11 @@ namespace GinpayFactory.ViewModels
     {
         private ISourceService _source;
 
-        //[ObservableProperty]
-        //private string name;
         
         [ObservableProperty]
         List<ServiceInput> services;
 
         public GenkokuWindowControlViewModel(ISourceService source){
-            //this.name = "Genkoku";
             _source = source;
             Services = new();
         }
@@ -51,7 +48,7 @@ namespace GinpayFactory.ViewModels
         {
             // 現在表示中のクラスに選択したServiceをインジェクションする。
             var serviceNames = services.Where(x => x.IsChecked).Select(x => x.ServiceName).ToList();
-            // TODO:ボタン押した時点のカーソルの位置を含むSpanのクラスからソースを取る
+            // ボタン押した時点のカーソルの位置を含むSpanのクラスからソースを取る
             await _source.AddAndReplaceInjectionAsync(serviceNames);
 
         }

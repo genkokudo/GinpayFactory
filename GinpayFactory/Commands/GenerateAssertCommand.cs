@@ -35,31 +35,7 @@ namespace GinpayFactory
                 );
                 return;
             }
-            // このtextに対してパターンマッチをかけ、登録されているサービス一覧を作成するメソッドを作る。（他のクラスにDIする時にも使う。）
-            var serviceNameList = source.GetServiceNameList(diSource.SourceCode);
-
-            await VS.MessageBox.ShowAsync(
-                "見つかったServiceのリスト",
-                string.Join("\r\n", serviceNameList),
-                OLEMSGICON.OLEMSGICON_INFO,
-                OLEMSGBUTTON.OLEMSGBUTTON_OK
-            );
-
-
             await GenkokuWindow.ShowAsync();
-
-
-
-
-
-            // TODO:csが出来たとして、どうやって既存コードと置換するのか？
-            // Delete,Insertはできるので、あとはDeleteする範囲を取得できればよい。
-
-            //    // 成功したら、カーソルの所に挿入
-            //    var docView = await VS.Documents.GetActiveDocumentViewAsync();
-            //    var selection = docView.TextView.Selection;
-            //    docView.TextBuffer.Delete(selection.SelectedSpans[0].Span);
-            //    docView.TextBuffer.Insert(selection.Start.Position, result);
 
 
         }

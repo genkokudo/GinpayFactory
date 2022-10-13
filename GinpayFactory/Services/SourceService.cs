@@ -12,7 +12,10 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Windows.Input;
 using System.Windows.Shapes;
+using static System.Net.Mime.MediaTypeNames;
 using Path = System.IO.Path;
 
 namespace GinpayFactory.Services
@@ -123,7 +126,6 @@ namespace GinpayFactory.Services
         /// <returns>サービスの一覧</returns>
         public IEnumerable<string> GetServiceNameList(string source);
 
-        // TODO:じっそうすること
         // 現在のカーソル位置のクラスがどれかを判別して、そのクラスのソースコードを取得する
         // Roslynからクラス一覧とそのSpanを取る
         // サービス名をインタフェースとしてDIしたソースを取得し、差し替える。
@@ -411,10 +413,16 @@ namespace GinpayFactory.Services
             var targetClass = classes.FirstOrDefault(x => x.Span.Contains(position.Position));
 
             // サービス名をインタフェースとしてDIしたソースに書き換える。
-            Roslyn.AddInjection(targetClass.SourceCode, serviceNames);
+            var newClass = Roslyn.AddInjection(targetClass.SourceCode, serviceNames);
+
+            // スペースがあれば揃える
+            var data = File.ReadAllText(docView.FilePath);
+            var targetLine = GetLineText(data, targetClass.SourceCode.Split('\r')[0]);
+            var spaces = GetIndentSpaces(targetLine);
+            newClass = newClass.Replace("\r\n", $"\r\n{spaces}");
 
             // クラスのSpanに対して、新しいソースに差し替える
-            DeleteAndInsertSource(docView, targetClass.Span, $"{string.Join(",\n", serviceNames)}差し替えたよ！");
+            DeleteAndInsertSource(docView, targetClass.Span, newClass);
 
             Console.WriteLine();
         }

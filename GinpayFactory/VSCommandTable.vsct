@@ -89,11 +89,11 @@
 				</Strings>
 			</Button>
 			<Button guid="GinpayFactory" id="GenerateAssertCommand" priority="0x0400" type="Button">
-				<Parent guid="GinpayFactory" id="MyXamarinMenuGroup" />
+				<Parent guid="GinpayFactory" id="DiSubMenuGroup" />
 				<Icon guid="ImageCatalogGuid" id="PasteAppend" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
-					<ButtonText>このClassのAssertを生成する</ButtonText>
+					<ButtonText>このClassにDIする</ButtonText>
 					<LocCanonicalName>.GinpayFactory.GenerateAssertCommand</LocCanonicalName>
 				</Strings>
 			</Button>

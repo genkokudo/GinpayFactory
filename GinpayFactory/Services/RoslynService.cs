@@ -205,9 +205,95 @@ namespace GinpayFactory.Services
 
         public string AddInjection(string source, IEnumerable<string> serviceNames)
         {
-            // クラスのソースコードに指定したサービスをDIしたソースコードを生成する。
-            // サービス名の頭に"I"を追加したインタフェースとしてDIされる。
-            throw new NotImplementedException();
+            string ToCamelCase(string pascal)
+            {
+                pascal = pascal.Replace("Service", string.Empty);
+                return char.ToLowerInvariant(pascal[0]) + pascal.Substring(1);
+            }
+
+            var syntaxTree = CSharpSyntaxTree.ParseText(source);
+            var compilation = CSharpCompilation.Create("sample", new SyntaxTree[] { syntaxTree }, references);
+            var semanticModel = compilation.GetSemanticModel(syntaxTree);
+            var nodes = syntaxTree.GetRoot();
+
+            // ノード群からクラスに関する構文情報を最初の1つだけ取得
+            var classSyntax = nodes.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
+
+            // フィールドを追加する、先頭に追加したい
+            var addMembers = new List<MemberDeclarationSyntax>();
+            foreach (var name in serviceNames)
+            {
+                var camel = ToCamelCase(name);
+                var field =
+                    SyntaxFactory.FieldDeclaration(
+                        SyntaxFactory.VariableDeclaration(
+                            SyntaxFactory.IdentifierName($"I{name}")))
+                    .AddDeclarationVariables(SyntaxFactory.VariableDeclarator($"_{camel}"));
+
+                field = field
+                    .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword))
+                    .AddModifiers(SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword));
+
+                addMembers.Add(field);
+            }
+            var currentMembers = classSyntax.Members;
+            currentMembers = currentMembers.InsertRange(0, addMembers);
+            classSyntax = classSyntax.WithMembers(currentMembers);
+
+            // コンストラクタ更新
+            var constructor = classSyntax.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault();
+            if (constructor == null)
+            {
+                // ない場合は新しく作る
+                var parameterList = serviceNames.Select(x => SyntaxFactory.Parameter(
+                    SyntaxFactory.Identifier(ToCamelCase(x)))
+                    .WithType(SyntaxFactory.IdentifierName($"I{x}")))
+                    .ToArray();
+
+                var statements = serviceNames.Select(x => SyntaxFactory.ExpressionStatement(
+                    SyntaxFactory.AssignmentExpression(
+                        SyntaxKind.SimpleAssignmentExpression,
+                        SyntaxFactory.IdentifierName($"_{ToCamelCase(x)}"),
+                        SyntaxFactory.IdentifierName(ToCamelCase(x))))
+                ).ToArray();
+
+                classSyntax = classSyntax.AddMembers(
+                    SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
+                    SyntaxFactory.ConstructorDeclaration(
+                        SyntaxFactory.Identifier(classSyntax.Identifier.Text))
+                    .WithModifiers(
+                        SyntaxFactory.TokenList(
+                            SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
+                    .WithParameterList(
+                        SyntaxFactory.ParameterList(
+                            SyntaxFactory.SeparatedList(parameterList)))
+                    .WithBody(
+                        SyntaxFactory.Block(
+                            statements))).ToArray());
+            }
+            else
+            {
+                // 初期処理を追加する
+                var newConstructor = constructor;
+                foreach (var name in serviceNames)
+                {
+                    var camel = ToCamelCase(name);
+                    newConstructor = newConstructor.AddBodyStatements(SyntaxFactory.ParseStatement($"_{camel} = {camel};"));
+                }
+                classSyntax = classSyntax.ReplaceNode(constructor, newConstructor);
+
+                // パラメータを追加する
+                constructor = classSyntax.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault();
+                SeparatedSyntaxList<ParameterSyntax> parametersList = new SeparatedSyntaxList<ParameterSyntax>().AddRange
+                (
+                    serviceNames.Select(x => SyntaxFactory
+                    .Parameter(SyntaxFactory.Identifier(ToCamelCase(x)))
+                    .WithType(SyntaxFactory.ParseTypeName($"I{x}"))).ToArray()
+                );
+                classSyntax = classSyntax.ReplaceNode(constructor.ParameterList, constructor.ParameterList.AddParameters(parametersList.ToArray()));
+            }
+
+            return classSyntax.NormalizeWhitespace().ToFullString();
         }
 
         public IEnumerable<MethodData> GetAllClasses(string path)

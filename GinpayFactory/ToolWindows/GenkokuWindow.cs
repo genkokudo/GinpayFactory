@@ -14,7 +14,7 @@ namespace GinpayFactory
     /// </summary>
     public class GenkokuWindow : BaseToolWindow<GenkokuWindow>
     {
-        public override string GetTitle(int toolWindowId) => "謎の機能を持つWindow";
+        public override string GetTitle(int toolWindowId) => "クラスにサービスを挿入する";
 
         public override Type PaneType => typeof(Pane);
 
